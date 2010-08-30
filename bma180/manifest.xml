@@ -1,0 +1,20 @@
+<package>
+  <description brief="bma180">
+
+     bma180
+
+  </description>
+  <author>mil1pal</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bma180</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="libusb-1.0"/>
+  <export>
+    <cpp cflags="-I${prefix}/msg/cpp"/>
+  </export>
+
+</package>
+
+

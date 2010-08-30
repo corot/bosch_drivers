@@ -1,0 +1,12 @@
+<launch>
+  <param name="/drivers/bma180/max_acc_g" value="16" type="double" />
+  <param name="/drivers/bma180/bandwidth_Hz" value="300" type="double" />
+  <param name="/drivers/bma180/rate_Hz" value="100.0" type="double" />
+  <param name="/drivers/bma180/calibrate" value="false" type="boolean" />
+
+  <!-- a basic listener node -->
+  <!-- also use output="screen" -->
+  <!-- launch-prefix="xterm -e" --> 
+  <node name="bma180_cluster" pkg="bma180" type="bma180" output="screen" />
+
+</launch>
