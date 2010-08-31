@@ -35,7 +35,7 @@ typedef unsigned short uint16_t;
 #endif	/*MSC_VER*/
 
 #ifdef LIBUSB_1_0
- #include <libusb.h>
+ #include <libusb-1.0/libusb.h>
 #else
  #include "../libusb/libusb-win32-src/src/usb.h"
 #endif
