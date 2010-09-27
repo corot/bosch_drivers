@@ -1,0 +1,8 @@
+Header header
+uint64[192] sensor_data_msg
+uint8 sensor_number_msg
+uint8 readadr_hi_msg
+uint8 readadr_lo_msg
+uint8 dyn_thres_cv_msg
+bool status_go_msg
+bool status_err_msg

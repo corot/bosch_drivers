@@ -1,0 +1,19 @@
+<package>
+  <description brief="skin_dashboard">
+
+     skin_dashboard
+
+  </description>
+  <author>Joerg Wagner</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/skin_dashboard</url>
+  <depend package="roslib"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="com_ecu"/>
+  
+  <rosdep name="wxwidgets"/>
+</package>
+
+
