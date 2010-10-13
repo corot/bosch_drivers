@@ -7,10 +7,10 @@
   <author>Lukas Marti</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://pr.willowgarage.com/wiki/mm5</url>
+  <url>http://pr.willowgarage.com/wiki/smi540</url>
   <depend package="std_msgs"/>
   <depend package="roscpp"/>
-  <depend package="libusb-1.0"/>
+  <rosdep name="libusb-1.0"/>
   <export>
     <cpp cflags="-I${prefix}/msg/cpp"/>
   </export>
