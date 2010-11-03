@@ -1,8 +1,0 @@
-Header header
-uint8[2] start_adr_srv
-uint8 steps_srv
-uint8 number_of_bytes_srv
-uint8 write_data_srv
-bool sens_num_change_srv
----
-bool write_to_skin_successful_srv

@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="com_ecu" name="com_ecu" type="com_ecu"/>
-  <node pkg="config_ecu" name="config_ecu" type="config_ecu"/>
-  <node pkg="skin_dashboard" name="skin_dashboard" type="skin_dashboard"/>
-</launch>
