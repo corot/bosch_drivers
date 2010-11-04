@@ -2,3 +2,5 @@ libgphoto:
   ubuntu: libgphoto2-2-dev
 libswscale:
   ubuntu: libswscale-dev
+libusb-1.0:
+  ubuntu: libusb-1.0-0-dev
