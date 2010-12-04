@@ -13,5 +13,6 @@
   <depend stack="diagnostics"/> <!-- self_test --> 
   <depend stack="ros"/> <!-- std_msgs, roscpp --> 
   <depend stack="common_msgs"/> <!-- sensor_msgs --> 
+  <depend stack="image_common"/> <!-- image_transport --> 
 
 </stack>
