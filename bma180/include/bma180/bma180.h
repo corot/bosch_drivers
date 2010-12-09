@@ -32,11 +32,11 @@
 #ifndef __BMA180__
 #define __BMA180__
 
-#include "libsub.h"
 #include "bma180/bma180meas.h"
 #include "bma180/bma180err.h"
 #include "bma180/bma180_calibrate.h"
 #include <list>
+#include <libsub.h> // sub20 device
 
 //Define BMA180 specifics
 namespace bma180_cmd {

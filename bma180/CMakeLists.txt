@@ -29,9 +29,5 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_library(sub src/sub20/libsub.c)
-add_definitions(-DLIBUSB_1_0)
-
 rosbuild_add_executable(bma180 src/bma180_calibrate src/bma180.cpp)
-target_link_libraries(bma180 sub usb-1.0)
-
+target_link_libraries(bma180 sub20)

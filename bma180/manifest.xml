@@ -10,11 +10,10 @@
   <url>http://ros.org/wiki/bma180</url>
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
-  <rosdep name="libusb-1.0"/>
+  <depend package="sub20"/>
+  
   <export>
     <cpp cflags="-I${prefix}/msg/cpp"/>
   </export>
 
 </package>
-
-
