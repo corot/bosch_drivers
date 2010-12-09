@@ -4,10 +4,10 @@
      A collection of hardware drivers in use at Bosch RTC.
 
   </description>
-  <author>Maintained by Charles DuHadway</author>
+  <author>Maintained by Benjamin Pitzer</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/drivers</url>
+  <url>http://ros.org/wiki/bosch_drivers</url>
   <depend stack="geometry"/> <!-- tf --> 
   <depend stack="vision_opencv"/> <!-- opencv2 --> 
   <depend stack="diagnostics"/> <!-- self_test --> 
