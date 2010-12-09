@@ -31,6 +31,8 @@
 #ifndef __SMI540__
 #define __SMI540__
 
+#include <libsub.h> // sub20 device
+
 //Define SMI540 specifics
 namespace cmd540 {
 	//Define MM5 commands

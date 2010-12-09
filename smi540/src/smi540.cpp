@@ -32,12 +32,10 @@
 #include <iostream>
 #include <string>
 #include <ros/ros.h>
-#include "libsub.h"
 #include "smi540/smi540.h"
 #include "smi540/smi540meas.h"
 #include <sstream>
 #include <ros/time.h>
-
 
 Smi540::Smi540():
     bSubDeviceOpen (false),
