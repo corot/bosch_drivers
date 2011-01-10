@@ -12,7 +12,7 @@
   <rosdep name="libusb-1.0"/>
   
   <export>
-    <cpp cflags="-I${prefix}/include -I${prefix}/build/src" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsub20"/>
+    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsub20"/>
   </export>
 
 </package>

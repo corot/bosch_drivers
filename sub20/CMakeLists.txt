@@ -36,6 +36,6 @@ endif(_get_failed)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_library(sub20 build/src/libsub.c)
+rosbuild_add_library(sub20 src/libsub.c)
 target_link_libraries(sub20 usb-1.0)
 add_definitions(-DLIBUSB_1_0)
