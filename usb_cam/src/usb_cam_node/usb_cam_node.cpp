@@ -96,7 +96,7 @@ public:
 
       if ((double_list.getType() == XmlRpc::XmlRpcValue::TypeArray)) {
         info_.D.resize(double_list.size());
-        for (size_t i=0; i<double_list.size(); i++) {
+        for (int i=0; i<double_list.size(); i++) {
           ROS_ASSERT(double_list[0].getType() == XmlRpc::XmlRpcValue::TypeDouble);
           info_.D[i] = double_list[i];
         }
