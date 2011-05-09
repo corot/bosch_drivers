@@ -1,7 +1,7 @@
 <package>
-  <description brief="ROS driver for the sub20 device from XDIMAX.">
+  <description brief="ROS driver for the SUB-20 device from XDIMAX.">
 
-     The driver enables communication with a XDIMAX SUB20 device via USB. The sub20 sources are downloaded from XDIMAX during build.
+     The driver enables communication with a XDIMAX SUB-20 device via USB. The SUB-20 sources are downloaded from XDIMAX during build.
 
   </description>
   <author>Sebastian Haug</author>
