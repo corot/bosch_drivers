@@ -1,0 +1,124 @@
+*** libsub.c.old	2011-06-16 13:26:07.113959992 -0700
+--- libsub.c	2011-06-16 17:07:59.545225797 -0700
+***************
+*** 70,78 ****
+  	};
+  }sub_pack;
+  
+! /* SUB Device Cash */
+  typedef struct
+  {
+  	sub_handle	handle;
+  	int			version;
+  
+--- 70,79 ----
+  	};
+  }sub_pack;
+  
+! /* SUB Device Cache */
+  typedef struct
+  {
++         sub_device      device;
+  	sub_handle	handle;
+  	int			version;
+  
+***************
+*** 98,104 ****
+  
+  #define SUB_F_CPU	16000000
+  				   
+! 
+  /*
+  *-----------------------------------------------------------------------------
+  * Global Variables
+--- 99,105 ----
+  
+  #define SUB_F_CPU	16000000
+  				   
+! #define SUB_DEV_CACHE_SIZE 16
+  /*
+  *-----------------------------------------------------------------------------
+  * Global Variables
+***************
+*** 117,123 ****
+  static int  init_required=1;
+  #endif
+  
+! sub_dev_cache_entry sub_dev_cache[255];
+  
+  
+  /*
+--- 118,124 ----
+  static int  init_required=1;
+  #endif
+  
+! sub_dev_cache_entry sub_dev_cache[SUB_DEV_CACHE_SIZE];
+  
+  
+  /*
+***************
+*** 180,186 ****
+  static int sub_dev_cache_lookup( sub_handle hndl )
+  {
+  	int		i;
+! 	for( i=0; i<255; i++ )
+  	{
+  		if( sub_dev_cache[i].handle == hndl )
+  			return i;
+--- 181,187 ----
+  static int sub_dev_cache_lookup( sub_handle hndl )
+  {
+  	int		i;
+! 	for( i=0; i<SUB_DEV_CACHE_SIZE; i++ )
+  	{
+  		if( sub_dev_cache[i].handle == hndl )
+  			return i;
+***************
+*** 358,363 ****
+--- 359,384 ----
+  }
+  
+  /*
++ * Check if SUB device is already open
++ * Return 1 if open, 0 otherwise
++ */
++ int sub_is_open( sub_device dev )
++ {
++   
++   if( !dev )
++   {
++     return 0;
++   }
++ 
++   for( int i=0; i < SUB_DEV_CACHE_SIZE; i++ )
++   {
++     if( sub_dev_cache[i].device == dev )
++       return 1;
++   }
++   return 0;
++ }
++   
++ /*
+  * Open SUB device
+  */
+  sub_handle sub_open( sub_device dev )
+***************
+*** 431,436 ****
+--- 452,458 ----
+  
+  	/* Update cache */
+  	i = sub_dev_cache_lookup( 0 );
++ 	sub_dev_cache[i].device = dev;
+  	sub_dev_cache[i].handle = handle;
+  
+  	return handle;
+***************
+*** 469,474 ****
+--- 491,497 ----
+  	
+  	/* Update cache */
+  	i = sub_dev_cache_lookup( 0 );
++ 	sub_dev_cache[i].device = dev;
+  	sub_dev_cache[i].handle = handle;
+  	
+  	return handle;
