@@ -75,16 +75,17 @@
   			return i;
 ***************
 *** 358,363 ****
---- 359,384 ----
+--- 359,387 ----
   }
   
   /*
 + * Check if SUB device is already open
 + * Return 1 if open, 0 otherwise
 + */
-+ int sub_is_open( sub_device dev )
++ int sub_is_open( sub_device dev, sub_handle hndl )
 + {
 +   
++   hndl = NULL;
 +   if( !dev )
 +   {
 +     return 0;
@@ -93,6 +94,8 @@
 +   for( int i=0; i < SUB_DEV_CACHE_SIZE; i++ )
 +   {
 +     if( sub_dev_cache[i].device == dev )
++     {
++       hndl = sub_dev_cache[i].handle;
 +       return 1;
 +   }
 +   return 0;
