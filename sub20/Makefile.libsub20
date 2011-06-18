@@ -6,7 +6,7 @@ TARBALL_URL     = http://www.xdimax.net/download/SUB-20-snap-$(TARBALL_VERSION).
 MD5SUM_FILE     = libsub20.md5sum
 UNPACK_CMD      = tar xzf
 SOURCE_DIR      = build/SUB-20-snap-$(TARBALL_VERSION)
-TARBALL_PATCH   = libsub20.patch,libsub20_open_h.patch,libsub20_open_c.patch
+TARBALL_PATCH   = libsub20.patch libsub20_h.patch libsub20_c.patch
 
 include $(shell rospack find mk)/download_unpack_build.mk
 
