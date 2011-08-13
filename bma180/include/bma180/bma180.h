@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Bosch LLC
+ * Copyright (c) 2011, Robert Bosch LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of Bosch LLC nor the names of its
+ *     * Neither the name of Robert Bosch LLC nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -27,10 +27,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-//\Author Lukas Marti, Bosch LLC
+/*
+ * bma180.h
+ *
+ *  Created on: Jul 26, 2011
+ *      Author: Lucas Marti, Robert Bosch LLC |
+ *      Editor: Nikhil Deshpande, Robert Bosch LLC |
+ */
 
-#ifndef __BMA180__
-#define __BMA180__
+#ifndef BMA180_H_
+#define BMA180_H_
 
 #include "bma180/bma180meas.h"
 #include "bma180/bma180err.h"
@@ -53,11 +59,11 @@ namespace bma180_cmd {
   const char    chADR_CTRLREG2       = {0x0F};
   const char    chADR_SOFTRESET      = {0x10};
   const char    chADR_EE_OFFSET_Z    = {0x5A};  // |
-  const char    chADR_EE_OFFSET_Y    = {0x59};	// |
-  const char    chADR_EE_OFFSET_X    = {0x58};	// |-> THIS IS THE EEPROM
-  const char    chADR_EE_OFFSET_T    = {0x57}; 	// |
-  const char    chADR_EE_OFFSET_LSB2 = {0x56};	// |
-  const char    chADR_EE_OFFSET_LSB1 = {0x55};	// |
+  const char    chADR_EE_OFFSET_Y    = {0x59};  // |
+  const char    chADR_EE_OFFSET_X    = {0x58};  // |-> THIS IS THE EEPROM
+  const char    chADR_EE_OFFSET_T    = {0x57};  // |
+  const char    chADR_EE_OFFSET_LSB2 = {0x56};  // |
+  const char    chADR_EE_OFFSET_LSB1 = {0x55};  // |
   const char    chADR_OFFSET_Z       = {0x3A};
   const char    chADR_OFFSET_Y       = {0x39};
   const char    chADR_OFFSET_X       = {0x38};
@@ -72,37 +78,39 @@ namespace bma180_cmd {
   const double  dFULLRANGELOOKUP[] = {1.0, 1.5, 2.0, 3.0, 4.0, 8.0, 16.0};
   const char    chCMD_FULLSCALE_G[]= {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
   //-----------------------------------
-  const double 	dBWLOOKUP[]       = {10, 20, 40, 75, 150, 300, 600, 1200};
+  const double  dBWLOOKUP[]       = {10, 20, 40, 75, 150, 300, 600, 1200};
   const char    chCMD_BANDWIDTH_HZ[]= {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
   //-----------------------------------
-  const char    chCMD_SOFTRESET		= {0xB6};
-  const char    chCMD_SET_EEW		= {0x01};
+  const char    chCMD_SOFTRESET         = {0xB6};
+  const char    chCMD_SET_EEW           = {0x01};
   //-----------------------------------
   enum eSensorType {eACCEL, eTEMP, eBIAS_X, eBIAS_Y, eBIAS_Z};
   //-----------------------------------
-  const unsigned short iMAXNUM_OF_SENSORS = 5; 		//Defined by the Xdimax Unit (which supports 5 sensors per box)
+  const unsigned short iMAXNUM_OF_SENSORS = 5;          //Defined by the Xdimax Unit (which supports 5 sensors per box)
   //-----------------------------------
-  const double  dDEFAULT_MAXACC_g 		= 16;
-  const double  dDEFAULT_BANDWIDTH_Hz 	= 300;
-  const double  dDEFAULT_RATE_Hz		= 500;
-  const bool    bDEFAULT_CALIBRATE		= false;
-  const double  dCALIB_ACCURACY			= 0.05;
+  const double  dDEFAULT_MAXACC_g               = 16;
+  const std::string     sSUB20SERIAL("0651");
+  const double  dDEFAULT_BANDWIDTH_Hz           = 300;
+  const double  dDEFAULT_RATE_Hz                = 500;
+  const bool    bDEFAULT_CALIBRATE              = false;
+  const double  dCALIB_ACCURACY                 = 0.05;
   //-----------------------------------
-  const unsigned short uSERIALNUMLENGTH	= 20;
+  const unsigned short uSERIALNUMLENGTH = 20;
   //-----------------------------------
-  const short   iDEFAULT_CALIBCHIPSELECT= 0; 		//this is out of range and ensures that no calibration is executed in case of error
+  const short   iDEFAULT_CALIBCHIPSELECT= 0;            //this is out of range and ensures that no calibration is executed in case of error
 }
 
 //Define measurement output
 struct OneBma180Meas {
   bool          bMeasAvailable; //indicates true if a valid measurement is available
-  double        dAccX;
-  double        dAccY;
-  double        dAccZ;
+  int           iNumAccels;
+  double        dAccX[bma180_cmd::iMAXNUM_OF_SENSORS];
+  double        dAccY[bma180_cmd::iMAXNUM_OF_SENSORS];
+  double        dAccZ[bma180_cmd::iMAXNUM_OF_SENSORS];
   double        dTemp;
   ros::Time     dtomeas; //time tag measurement immediately in case of other delays
   std::string   strSerial;
-  int           iChipSelect;
+  int           iChipSelect[bma180_cmd::iMAXNUM_OF_SENSORS];
 };
 
 
@@ -115,28 +123,30 @@ struct OneBma180Meas {
  */
 class Bma180 {
   public:
-	//! Constructor initializes Sub20 device and BMA180ies
-	/*!
+        //! Constructor initializes Sub20 device and BMA180ies
+        /*!
      * Detects connected Sub20 devices and BMA180ies. Initializes
      * the Sub20 device and loads configures the BMA180 with the
      * specified bandwidth and max acceleration range. On request it
-     * perfroms sensor calibration
+     * performs sensor calibration
      *
      * \param dMaxAcc_g The maximum acceleration range of the sensor
      * \param dBandwidth_Hz The bandwidth of the sensor front-end
      * \param bCalibrate Requesting sensor calibration
+     * \param dRate_Hz Sensor reading rate
+     * \param sSub20Serial Requesting desired sub20 to be opened
      */
-	Bma180(double, double, bool);
+        Bma180(double, double, bool, double, std::string);
 
-	//! Destructor closing all open connections
-	/*!
+        //! Destructor closing all open connections
+        /*!
      * Closes open SPI connections and disables the Sub20 device. Disposes
      * any dynamic structure in the heap.
      */
-	~Bma180();
+        ~Bma180();
 
-	//! Polls one measurement from all BMA180 defined in std::list<OneBma180Meas>&
-	/*!
+        //! Polls one measurement from all BMA180 defined in std::list<OneMultBmaMeas>&
+        /*!
      * Iterates through all detected BMA180ies on all connected Sub20 devices and sends
      * a measurement request to the respective sensor. In case of calibration request,
      * any received measurement is used to calibrate the sensor.
@@ -146,11 +156,11 @@ class Bma180 {
      *
      * \param &list_meas points onto the std::list containing the connected devices
      */
-	void GetMeasurements( std::list<OneBma180Meas>& );
+        void GetMeasurements( std::list<OneBma180Meas>& );
 
   private:
-	// structure for one bma180 configuration
-	struct OneBma180Config {
+        // structure for one bma180 configuration
+    struct OneBma180Config {
       double          dFullScaleRange;
       double          dSensorBandwidth;
       bool            bConfigured;
@@ -159,15 +169,15 @@ class Bma180 {
       unsigned short  uiBiasImageZ;
       double          iNumOfCalibMeas;
     };
-	// structure for one Sub20 device configuration
-	struct OneSub20Config {
+        // structure for one Sub20 device configuration
+    struct OneSub20Config {
       std::string     strSub20Serial;
       sub_handle      handle_subdev;
       sub_device      subdev;
-      bool            bSubDevConfigured;
+      bool            bSubSPIConfigured;
       OneBma180Config Bma180Cluster[bma180_cmd::iMAXNUM_OF_SENSORS];
     };
-    std::list<OneSub20Config> 	Sub20Device_list;
+    std::list<OneSub20Config>   Sub20Device_list;
 
     // internal calibration flags
     bool              bExecuteCalibration;
@@ -180,13 +190,13 @@ class Bma180 {
     int               iCalib_CS;
 
     // internal Sub20 device data
-    sub_handle 	      fd;						//handle for subdevice
-    bool              bSubDeviceOpen;			//initialization flag
-    bool 		      bSubDeviceConfigured;  	//verify if subdevice is configured
-    std::string       strSerial; 				//Serial number of SUB20 device
+    sub_handle        subhndl;                                               //handle for subdevice
+    bool              bSubDeviceOpen;                   //initialization flag
+    bool              bSubDeviceConfigured;     //verify if subdevice is configured
+    std::string       strSerial;                                //Serial number of SUB20 device
 
     /// Converts BMA180 formatted data into double
-    double            bma180data_to_double(char, char, bma180_cmd::eSensorType, double);
+    double            bma180data_to_double(char, char, bma180_cmd::eSensorType, int *,  double);
 
     /// Converts BMA180 formatted data into an unsigned int
     unsigned short    bma180data_to_uint(char, char, bma180_cmd::eSensorType );
@@ -203,11 +213,12 @@ class Bma180 {
     /// Writes specified bits into the eeprom image
     bool              write_bit_eeprom_sub20(char, unsigned short, unsigned short, char, unsigned short, sub_handle);
 
-    /// Configures specified BMA180 according to the deafult or user settings
+    /// Configures specified BMA180 according to the default or user settings
     void              confsens_on_sub20(OneSub20Config*, char, char);
 
     /// Sets the calibration status of the object
     void              set_calibstatus(bool bCalibrate);
 };
 
-#endif
+#endif /* MULT_BMA180_H_ */
+

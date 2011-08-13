@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Bosch LLC
+ * Copyright (c) 2011, Robert Bosch LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of Bosch LLC nor the names of its
+ *     * Neither the name of Robert Bosch LLC nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  *
@@ -27,7 +27,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-//\Author Lukas Marti, Bosch LLC
+/*
+ * bma180.cpp
+ *
+ *  Created on: Jul 26, 2011
+ *      Author: Lucas Marti, Robert Bosch LLC |
+ *      Editor: Nikhil Deshpande, Robert Bosch LLC |
+ */
 #include <iostream>
 #include <string>
 #include <ros/ros.h>
@@ -35,24 +41,29 @@
 #include <sstream>
 #include <ros/time.h>
 #include <math.h>
+#include <vector>
 
-Bma180::Bma180(double dMaxAcc_g, double dBandwidth_Hz, bool bCalibrate):
+Bma180::Bma180(double dMaxAcc_g, double dBandwidth_Hz, bool bCalibrate, double dRate_Hz, std::string sSub20Serial):
   bSubDeviceOpen        (false),
   bSubDeviceConfigured  (false)
 {
   int               iSpiErr; 		//Error code fostd r Sub20 API
   int               iSPI_cfg_set; 	//Set SPI config
   int               iSPI_cfg_get; 	//Get SPI config
+  int               iADCErr;            //Error code for std Sub20 API
+  int               iADC_cfg_set;         //Set ADC config
   int               iNumOfRanges;
   int               iElCount;
   std::stringstream ss_errmsg;
+  std::string       ss_config, sub20Serial;
   sub_device        sub20dev;
   sub_handle        sub20handle;
   OneSub20Config    OneSub20Configuration;
 
   ROS_INFO("--------------------------------------");
-  ROS_INFO("Max acceleration entered %f ", dMaxAcc_g);
-  ROS_INFO("Sensor bandwidth entered %f ", dBandwidth_Hz);
+  ROS_INFO("Max acceleration entered:: %f ", dMaxAcc_g);
+  ROS_INFO("Sensor bandwidth entered:: %f ", dBandwidth_Hz);
+  ROS_INFO("Sensor Reading Rate entered:: %f ", dRate_Hz);
   ROS_INFO("--------------------------------------");
 
   ///////////////////////////////////////////////////////////
@@ -67,7 +78,7 @@ Bma180::Bma180(double dMaxAcc_g, double dBandwidth_Hz, bool bCalibrate):
   while ((dMaxAcc_g > bma180_cmd::dFULLRANGELOOKUP[iElCount]) && (iElCount < iNumOfRanges)) {
     iElCount++;
   };
-  ROS_INFO("Range chosen G %f ", bma180_cmd::dFULLRANGELOOKUP[iElCount]);
+  ROS_INFO("Range chosen G:: %f ", bma180_cmd::dFULLRANGELOOKUP[iElCount]);
 
   chMaxAccRange_selected = bma180_cmd::chCMD_FULLSCALE_G[iElCount];
   ///////////////////////////////////////////////////////////
@@ -78,7 +89,7 @@ Bma180::Bma180(double dMaxAcc_g, double dBandwidth_Hz, bool bCalibrate):
   while ((dBandwidth_Hz > bma180_cmd::dBWLOOKUP[iElCount]) && (iElCount < iNumOfRanges)) {
     iElCount++;
   };
-  ROS_INFO("Range chosen BW %f ", bma180_cmd::dBWLOOKUP[iElCount]);
+  ROS_INFO("Range chosen BW:: %f ", bma180_cmd::dBWLOOKUP[iElCount]);
 
   chBW_selected = bma180_cmd::chCMD_BANDWIDTH_HZ[iElCount];
   ///////////////////////////////////////////////////////////
@@ -90,48 +101,60 @@ Bma180::Bma180(double dMaxAcc_g, double dBandwidth_Hz, bool bCalibrate):
     sub20handle = sub_open( sub20dev );
     // on success, sub_open returns non-zero handle
     if (sub20handle > 0) {
-      //////////////////////////////////////////////////////////
-      // Configure Sub20 device
-      //////////////////////////////////////////////////////////
-      std::cout << "---Initializing SPI Interface---" << " \n";
-      // Read current SPI configuration
-      iSpiErr = sub_spi_config( sub20handle, 0, &iSPI_cfg_get );
-      std::cout << "Dev Sub config  : " << iSPI_cfg_get << " \n";
-      //Important: The SPI interface does not work properly at higher frequencies, i.e. > 2MHz
-      // SET: Polarity Fall, SetupSmpl,  MSB first, 2MHZ
-      iSPI_cfg_set = SPI_ENABLE|SPI_CPOL_FALL|SPI_SETUP_SMPL|SPI_MSB_FIRST|SPI_CLK_2MHZ;
-      //Configure SPI
-      iSpiErr = sub_spi_config( sub20handle, iSPI_cfg_set, 0 );
-      //Read current SPI configuration
-      iSpiErr = sub_spi_config( sub20handle, 0, &iSPI_cfg_get );
-      //verify if sub20 device has accepted the configuration
-      if (iSPI_cfg_get == iSPI_cfg_set ) {
-        std::cout<< "Configuration   : " << iSPI_cfg_set << " successfully stored \n";
-        //Subdevice has been configured successfully
-        OneSub20Configuration.bSubDevConfigured = true;
-        //string needs to be cleared otherwise conversion is going wrong
-        strSerial.clear();
-        strSerial.resize(bma180_cmd::uSERIALNUMLENGTH);
-        sub_get_serial_number(sub20handle, const_cast<char*>(strSerial.c_str()), strSerial.size());
-        OneSub20Configuration.strSub20Serial 	= strSerial;
-        OneSub20Configuration.handle_subdev 	= sub20handle;
-        OneSub20Configuration.subdev 			= sub20dev;
-        std::cout << "Device Handle   : " << OneSub20Configuration.handle_subdev << std::endl;
-        std::cout << "Serial Number   : " << OneSub20Configuration.strSub20Serial << std::endl;
-        /////////////////////////////////////////////////
-        // Configure Sensors on Sub20
-        /////////////////////////////////////////////////
-        confsens_on_sub20( &OneSub20Configuration, chMaxAccRange_selected, chBW_selected );
-        /////////////////////////////////////////////////
-        // Push element onto list of subdevices
-        /////////////////////////////////////////////////
-        Sub20Device_list.push_back (OneSub20Configuration);
-        std::cout << "Serial : " << OneSub20Configuration.strSub20Serial << "\n";
-      }
-      else {
-        ROS_INFO("ERROR - Configuration : %d not accept by device", iSPI_cfg_set);
-        //Subdevice could not be configured
-        OneSub20Configuration.bSubDevConfigured = false;
+      sub20Serial.clear();
+      sub20Serial.resize(bma180_cmd::uSERIALNUMLENGTH);
+      sub_get_serial_number(sub20handle, const_cast<char*>(sub20Serial.c_str()), sub20Serial.size());
+      std::cout << "Serial Number   : " << sub20Serial << std::endl;
+      if(strcmp(sub20Serial.c_str(), sSub20Serial.c_str()) == 0) {
+        subhndl = sub20handle;
+        //////////////////////////////////////////////////////////
+        // Configure Sub20 device
+        //////////////////////////////////////////////////////////
+        std::cout << "---Initializing SPI Interface---" << " \n";
+        // Read current SPI configuration
+        iSpiErr = sub_spi_config( sub20handle, 0, &iSPI_cfg_get );
+        std::cout << "Sub SPI config  : " << iSPI_cfg_get << " \n";
+        //Important: The SPI interface does not work properly at higher frequencies, i.e. > 2MHz
+        // SET: Polarity Fall, SetupSmpl,  MSB first, 2MHZ
+        iSPI_cfg_set = SPI_ENABLE|SPI_CPOL_FALL|SPI_SETUP_SMPL|SPI_MSB_FIRST|SPI_CLK_2MHZ;
+        //Configure SPI
+        iSpiErr = sub_spi_config( sub20handle, iSPI_cfg_set, 0 );
+        //Read current SPI configuration
+        iSpiErr = sub_spi_config( sub20handle, 0, &iSPI_cfg_get );
+        //verify if sub20 device has accepted the configuration
+        if (iSPI_cfg_get == iSPI_cfg_set ) {
+          std::cout<< "SPI Configuration   : " << iSPI_cfg_set << " successfully stored \n";
+          //Subdevice has been configured successfully
+          OneSub20Configuration.bSubSPIConfigured = true;
+          OneSub20Configuration.handle_subdev     = sub20handle;
+          /////////////////////////////////////////////////
+          // Configure Sensors on Sub20
+          /////////////////////////////////////////////////
+          confsens_on_sub20( &OneSub20Configuration, chMaxAccRange_selected, chBW_selected);
+        }
+        else {
+          ROS_INFO("ERROR - SPI Configuration : %d not accepted by device", iSPI_cfg_set);
+          //Subdevice could not be configured
+          OneSub20Configuration.bSubSPIConfigured = false;
+        }
+        if(OneSub20Configuration.bSubSPIConfigured){
+          //string needs to be cleared otherwise conversion is going wrong
+          strSerial.clear();
+          strSerial.resize(bma180_cmd::uSERIALNUMLENGTH);
+          sub_get_serial_number(sub20handle, const_cast<char*>(strSerial.c_str()), strSerial.size());
+          OneSub20Configuration.strSub20Serial    = strSerial;
+          OneSub20Configuration.subdev            = sub20dev;
+          std::cout << "Device Handle   : " << OneSub20Configuration.handle_subdev << std::endl;
+          std::cout << "Serial Number   : " << OneSub20Configuration.strSub20Serial << std::endl;
+          /////////////////////////////////////////////////
+          // Push element onto list of subdevices
+          /////////////////////////////////////////////////
+          Sub20Device_list.push_back (OneSub20Configuration);
+          std::cout << "... Publishing to topic /bma180 ... " << std::endl;
+        }
+        break;
+      } else {
+        sub_close( sub20handle );
       }
     }
     //find next device, sub_find_devices using current provides next
@@ -140,9 +163,13 @@ Bma180::Bma180(double dMaxAcc_g, double dBandwidth_Hz, bool bCalibrate):
 };
 
 Bma180::~Bma180() {
-  std::stringstream	ss_errmsg;
+  int iSpiErr;
   OneSub20Config OneSub20Configuration;
   //close opened subdevices
+  // Disable SPI
+  iSpiErr = sub_spi_config( subhndl, 0, 0 );
+  // Close USB device
+  sub_close( subhndl );
   while (!Sub20Device_list.empty()) {
     OneSub20Configuration = Sub20Device_list.back ();
     std::cout << "Sub device removed " << OneSub20Configuration.strSub20Serial << "\n";
@@ -150,17 +177,18 @@ Bma180::~Bma180() {
   }
 };
 
-void Bma180::GetMeasurements(std::list<OneBma180Meas> &list_meas ) {
+void Bma180::GetMeasurements(std::list<OneBma180Meas> &list_meas) {
   char                  chACC_XYZ[7]; //Containing
   double                dAccX, dAccY, dAccZ;
   double                dEstBiasX, dEstBiasY, dEstBiasZ;
-  int                   uiBcorrX, uiBcorrY, uiBcorrZ;
+  int                   uiBcorrX, uiBcorrY, uiBcorrZ, uiRawX, uiRawY, uiRawZ;
   double                dTemp;
-  int                   iSpiErr;
-  OneBma180Meas         sMeas;
+  int                   iSpiErr, iADCErr, dummy, j=0;
+  bool                  SPIMeas=false, ADCMeas=false;
+  OneBma180Meas        sMeas;
   ros::Time             dtomeas;
   char                  chCMD;
-  std::stringstream	    ss_errmsg;
+  std::stringstream	ss_errmsg;
   std::list<OneSub20Config>::iterator iterat;
   int                   iChipSelect;
 
@@ -172,7 +200,7 @@ void Bma180::GetMeasurements(std::list<OneBma180Meas> &list_meas ) {
   //Trace sub20 list
   for (iterat = Sub20Device_list.begin(); iterat != Sub20Device_list.end(); iterat++ ) {
     //verify if the sub20 device is configured (which should be the case as only configured sub20ies are pushed on list)
-    if (iterat->bSubDevConfigured == true) {
+    if (iterat->bSubSPIConfigured == true) {
       //Trace through cluster
       for (iChipSelect=0; iChipSelect < bma180_cmd::iMAXNUM_OF_SENSORS; iChipSelect++ ) {
       //verify if sensor is available on respective chipselect
@@ -189,24 +217,23 @@ void Bma180::GetMeasurements(std::list<OneBma180Meas> &list_meas ) {
           iSpiErr += sub_spi_transfer( iterat->handle_subdev, 0, &chCMD, 1, SS_CONF(iChipSelect,SS_H) );
 
           if (iSpiErr == 0 ) {
-            dAccX = bma180data_to_double(chACC_XYZ[1], chACC_XYZ[0], bma180_cmd::eACCEL, iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
-            dAccY = bma180data_to_double(chACC_XYZ[3], chACC_XYZ[2], bma180_cmd::eACCEL, iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
-            dAccZ = bma180data_to_double(chACC_XYZ[5], chACC_XYZ[4], bma180_cmd::eACCEL, iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
-            dTemp = bma180data_to_double(chACC_XYZ[6], chACC_XYZ[6], bma180_cmd::eTEMP,  iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
-            //Output the data
-            sMeas.dAccX				= dAccX;
-            sMeas.dAccY 			= dAccY;
-            sMeas.dAccZ 			= dAccZ;
-            sMeas.dTemp 			= dTemp;
-            sMeas.dtomeas 			= ros::Time::now();
-            sMeas.bMeasAvailable 	= true;
-            sMeas.iChipSelect		= iChipSelect;
-            sMeas.strSerial			= iterat->strSub20Serial;
-            //Push measurement onto heap
-            list_meas.push_back (sMeas);
+            SPIMeas = true;
+            dAccX = bma180data_to_double(chACC_XYZ[1], chACC_XYZ[0], bma180_cmd::eACCEL, &uiRawX, iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
+            dAccY = bma180data_to_double(chACC_XYZ[3], chACC_XYZ[2], bma180_cmd::eACCEL, &uiRawY, iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
+            dAccZ = bma180data_to_double(chACC_XYZ[5], chACC_XYZ[4], bma180_cmd::eACCEL, &uiRawZ, iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
+            dTemp = bma180data_to_double(chACC_XYZ[6], chACC_XYZ[6], bma180_cmd::eTEMP,  &dummy, iterat->Bma180Cluster[iChipSelect].dFullScaleRange );
+
+            // Collect data for all chipSelects
+            sMeas.dAccX[j]		= dAccX;
+            sMeas.dAccY[j]		= dAccY;
+            sMeas.dAccZ[j]		= dAccZ;
+            sMeas.dTemp 		= dTemp;
+            sMeas.iChipSelect[j]        = iChipSelect;
+            j++;
+            sMeas.iNumAccels = j;
 
             ////////////////////////////////////////////
-            // Execute calibration of desired
+            // Execute calibration if desired
             // Note: For calibration procedure, only one XDIMAX box is allowed to be connected
             ////////////////////////////////////////////
             if   ( (bExecuteCalibration == true) && (2>(int)Sub20Device_list.size()) )  {
@@ -311,10 +338,18 @@ void Bma180::GetMeasurements(std::list<OneBma180Meas> &list_meas ) {
             }
           }
           else {
-            throw std::string ("Error on SPI communication - keep on runnning though");
+            throw std::string ("Error on SPI communication - keep on running though");
           }
         } //config verify
       } //scanning through all the chipselects
+    }
+    // Only publish data after all data for all chipSelects is collected
+    if(SPIMeas) {
+      sMeas.dtomeas         = ros::Time::now();
+      sMeas.bMeasAvailable  = true;
+      sMeas.strSerial       = iterat->strSub20Serial;
+      //Push measurement onto heap
+      list_meas.push_back (sMeas);
     }
     else {
       throw std::string ("SUB20 connected but not configured - Restart of node suggested");
@@ -322,7 +357,7 @@ void Bma180::GetMeasurements(std::list<OneBma180Meas> &list_meas ) {
   } //sub20 for loop
 };
 
-double Bma180::bma180data_to_double(char chMSB, char chLSB, bma180_cmd::eSensorType eSensor, double dAccScale) {
+double Bma180::bma180data_to_double(char chMSB, char chLSB, bma180_cmd::eSensorType eSensor, int *raw, double dAccScale) {
   short 	s16int;			//2 byte int to build message
   double 	dSensorMeas; 	//Scaled sensor measurement
 
@@ -341,7 +376,7 @@ double Bma180::bma180data_to_double(char chMSB, char chLSB, bma180_cmd::eSensorT
         //set MSB (sign) to zero and build 2 complement unsigned; offset 8192 for 2^13
         s16int = (short) (((((unsigned short)chMSB)&0x7F)<<6)+((((unsigned short)chLSB)&0xFC)>>2) - 8192);
       }
-      dSensorMeas = ( (double) s16int) / 8192*dAccScale;
+      dSensorMeas = (( (double) s16int) / 8192)*dAccScale;
       break;
     ///////////////////////////////////////////////////////////
     // Convert Temperature Data
@@ -357,12 +392,13 @@ double Bma180::bma180data_to_double(char chMSB, char chLSB, bma180_cmd::eSensorT
         //set MSB (sign) to zero and build 2 complement unsigned; offset 128 for 2^7
         s16int = (short) ((((unsigned short)chLSB)&0x7F) - 128 );
       };
-      dSensorMeas = ( (double) s16int) / 8192*2;
+      dSensorMeas = (( (double) s16int) / 8192)*2;
       break;
 
     default :
       dSensorMeas = 0;
   }
+  *raw = s16int;
   return (dSensorMeas);
 };
 
@@ -563,7 +599,7 @@ void Bma180::confsens_on_sub20(OneSub20Config *pOneSub20Conf, char chFullscale, 
       ROS_INFO(" NO SENSOR DETECTED ");
       ROS_INFO("-----------------------------------------");
 
-      //Set flag that sensor has been initialized
+      //Set flag that sensor hasn't been initialized
       pOneSub20Conf->Bma180Cluster[iChipSelect].bConfigured 		= false;
       pOneSub20Conf->Bma180Cluster[iChipSelect].dFullScaleRange 	= 0;
       pOneSub20Conf->Bma180Cluster[iChipSelect].dSensorBandwidth 	= 0;
@@ -763,39 +799,41 @@ int main(int argc, char **argv) {
   // Declarations
   //---------------------------------------------
   //General definitions
-  int 				count = 1;
-  //Publisher for BMA180 data
+  int   count = 1, i=0;
+  //Publisher for Sub20 sensor data
   ros::init(argc, argv, "bma180");
   ros::NodeHandle n;
   ros::Publisher bma180_pub = n.advertise<bma180::bma180meas>("bma180", 100);
   //Parameter Server values
-  double 	dMaxAcc_g;
-  double 	dRate_Hz;
-  double 	dBandwidth_Hz;
+  double 	dMaxAcc_g, dRate_Hz, dBandwidth_Hz;
   bool 		bCalibrate;
+  std::string   sSub20Serial;
 
   //---------------------------------------------
   // Read initialization parameters from server
   //---------------------------------------------
   //Read parameters from server - if parameters are not available, the node
   //is initialized with default
-  if (n.getParam("/drivers/bma180/max_acc_g", dMaxAcc_g)                == false ) {
+  if (n.getParam("/bma180/max_acc_g", dMaxAcc_g)                == false ) {
     dMaxAcc_g = bma180_cmd::dDEFAULT_MAXACC_g;
   };
-  if (n.getParam("/drivers/bma180/bandwidth_Hz", dBandwidth_Hz)         == false ) {
+  if (n.getParam("/bma180/bandwidth_Hz", dBandwidth_Hz)         == false ) {
     dBandwidth_Hz = bma180_cmd::dDEFAULT_BANDWIDTH_Hz;
   };
-  if (n.getParam("/drivers/bma180/rate_Hz", dRate_Hz)                   == false ) {
+  if (n.getParam("/bma180/rate_Hz", dRate_Hz)                   == false ) {
     dRate_Hz = bma180_cmd::dDEFAULT_RATE_Hz;
   };
-  if (n.getParam("/drivers/bma180/calibrate", bCalibrate)               == false ) {
+  if (n.getParam("/bma180/calibrate", bCalibrate)               == false ) {
     bCalibrate = bma180_cmd::bDEFAULT_CALIBRATE;
   };
+  if (n.getParam("/bma180/sub20serial", sSub20Serial)           == false ) {
+    sSub20Serial = bma180_cmd::sSUB20SERIAL;
+  };
 
-  Bma180 				bma180_attached(dMaxAcc_g, dBandwidth_Hz, bCalibrate);
+  Bma180 			bma180_attached(dMaxAcc_g, dBandwidth_Hz, bCalibrate, dRate_Hz, sSub20Serial);
   OneBma180Meas 		sOneMeas;
-  bma180::bma180meas 	msg;
-  std::list<OneBma180Meas> measurements_list;
+  bma180::bma180meas      msg;
+  std::list<OneBma180Meas>     measurements_list;
 
   ///////////////////////////////////////////////////////////
   // Run sensor node
@@ -821,12 +859,22 @@ int main(int argc, char **argv) {
       //only publish if a successful measurement was received
       if ( sOneMeas.bMeasAvailable == true ) {
         msg.strIdSubDev   = sOneMeas.strSerial;
-        msg.iChipSelect   = sOneMeas.iChipSelect;
-        msg.fAcclX        = sOneMeas.dAccX;
-        msg.fAcclY        = sOneMeas.dAccY;
-        msg.fAcclZ        = sOneMeas.dAccZ;
+
+        // collect all available chipselect values into one message
+        for ( i=0; i<sOneMeas.iNumAccels; i++ ) {
+          msg.iChipSelect.push_back(sOneMeas.iChipSelect[i]);
+          msg.fAcclX.push_back(sOneMeas.dAccX[i]);
+          msg.fAcclY.push_back(sOneMeas.dAccY[i]);
+          msg.fAcclZ.push_back(sOneMeas.dAccZ[i]);
+        }
         msg.header.stamp  = sOneMeas.dtomeas;
-        bma180_pub.publish(msg);
+        bma180_pub.publish(msg);   // publish to topic!
+
+        // clear the message values after publishing to avoid accumulation of further values on subsequent messages.
+        msg.iChipSelect.clear();
+        msg.fAcclX.clear();
+        msg.fAcclY.clear();
+        msg.fAcclZ.clear();
       }
     }
     ros::spinOnce();
@@ -834,4 +882,5 @@ int main(int argc, char **argv) {
     ++count;
   }
 }
+
 

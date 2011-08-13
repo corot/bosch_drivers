@@ -57,13 +57,13 @@ bool bma180_calibrate::setdata_bma180(OneBma180Meas OneMeas) {
   bool 	bSetdata_success = false;
 
   if (CalibSensor[iActiveDataIndex].bCalibsensID_set == true) {
-    if  ( ( CalibSensor[iActiveDataIndex].Sensor_ID.Sub20ID == OneMeas.strSerial ) && (CalibSensor[iActiveDataIndex].Sensor_ID.iChipSelect == OneMeas.iChipSelect) ) {
+    if  ( ( CalibSensor[iActiveDataIndex].Sensor_ID.Sub20ID == OneMeas.strSerial ) && (CalibSensor[iActiveDataIndex].Sensor_ID.iChipSelect == OneMeas.iChipSelect[0]) ) {
       if ( CalibSensor[iActiveDataIndex].bCalib_complete == false ) {
         if (CalibSensor[iActiveDataIndex].iNumOfCalibMeas == 0) {
           //since first data set - current measurement equals bias
-          CalibSensor[iActiveDataIndex].dBias_AccX 			= OneMeas.dAccX;
-          CalibSensor[iActiveDataIndex].dBias_AccY 			= OneMeas.dAccY;
-          CalibSensor[iActiveDataIndex].dBias_AccZ 			= OneMeas.dAccZ;
+          CalibSensor[iActiveDataIndex].dBias_AccX 			= OneMeas.dAccX[0];
+          CalibSensor[iActiveDataIndex].dBias_AccY 			= OneMeas.dAccY[0];
+          CalibSensor[iActiveDataIndex].dBias_AccZ 			= OneMeas.dAccZ[0];
           CalibSensor[iActiveDataIndex].AgeOfBias 			= OneMeas.dtomeas;
           CalibSensor[iActiveDataIndex].iNumOfCalibMeas++;
           bSetdata_success = true;
@@ -73,9 +73,9 @@ bool bma180_calibrate::setdata_bma180(OneBma180Meas OneMeas) {
           std_estbias_acc		= bma180_spec::std_acc_g/sqrt((double)CalibSensor[iActiveDataIndex].iNumOfCalibMeas);
 
           //calculate measurement deviation
-          measdev_accX = fabs(OneMeas.dAccX - CalibSensor[iActiveDataIndex].dBias_AccX);
-          measdev_accY = fabs(OneMeas.dAccY - CalibSensor[iActiveDataIndex].dBias_AccY);
-          measdev_accZ = fabs(OneMeas.dAccZ - CalibSensor[iActiveDataIndex].dBias_AccZ);
+          measdev_accX = fabs(OneMeas.dAccX[0] - CalibSensor[iActiveDataIndex].dBias_AccX);
+          measdev_accY = fabs(OneMeas.dAccY[0] - CalibSensor[iActiveDataIndex].dBias_AccY);
+          measdev_accZ = fabs(OneMeas.dAccZ[0] - CalibSensor[iActiveDataIndex].dBias_AccZ);
 
 //					std::cout << "Num of Meas " << CalibSensor.iNumOfCalibMeas  << "std est bias " << std_estbias_acc << " \r";
 
@@ -93,9 +93,9 @@ bool bma180_calibrate::setdata_bma180(OneBma180Meas OneMeas) {
             // Filter bias based on filterconstant tau
             // bias_k1 = bias_k0 + 1/Tau*(meas_k1-bias_k0), where TAU needs to be adjusted to
             // to the filter period as defined by the Allan Variance
-            CalibSensor[iActiveDataIndex].dBias_AccX 	= CalibSensor[iActiveDataIndex].dBias_AccX	+ 1/((double)bma180_spec::calib_varreduct)*(OneMeas.dAccX-CalibSensor[iActiveDataIndex].dBias_AccX);
-            CalibSensor[iActiveDataIndex].dBias_AccY 	= CalibSensor[iActiveDataIndex].dBias_AccY  + 1/((double)bma180_spec::calib_varreduct)*(OneMeas.dAccY-CalibSensor[iActiveDataIndex].dBias_AccY);
-            CalibSensor[iActiveDataIndex].dBias_AccZ 	= CalibSensor[iActiveDataIndex].dBias_AccZ  + 1/((double)bma180_spec::calib_varreduct)*(OneMeas.dAccZ-CalibSensor[iActiveDataIndex].dBias_AccZ);
+            CalibSensor[iActiveDataIndex].dBias_AccX 	= CalibSensor[iActiveDataIndex].dBias_AccX	+ 1/((double)bma180_spec::calib_varreduct)*(OneMeas.dAccX[0]-CalibSensor[iActiveDataIndex].dBias_AccX);
+            CalibSensor[iActiveDataIndex].dBias_AccY 	= CalibSensor[iActiveDataIndex].dBias_AccY  + 1/((double)bma180_spec::calib_varreduct)*(OneMeas.dAccY[0]-CalibSensor[iActiveDataIndex].dBias_AccY);
+            CalibSensor[iActiveDataIndex].dBias_AccZ 	= CalibSensor[iActiveDataIndex].dBias_AccZ  + 1/((double)bma180_spec::calib_varreduct)*(OneMeas.dAccZ[0]-CalibSensor[iActiveDataIndex].dBias_AccZ);
 
             CalibSensor[iActiveDataIndex].iNumOfCalibMeas++;
             //set age of bias
@@ -129,7 +129,7 @@ bool bma180_calibrate::setdata_bma180(OneBma180Meas OneMeas) {
 void bma180_calibrate::setcalibsens(OneBma180Meas OneMeas) {
   int iCount;
   for (iCount=0; iCount < 2; iCount++) {
-    CalibSensor[iCount].Sensor_ID.iChipSelect 	= OneMeas.iChipSelect;
+    CalibSensor[iCount].Sensor_ID.iChipSelect 	= OneMeas.iChipSelect[0];
     CalibSensor[iCount].Sensor_ID.Sub20ID		= OneMeas.strSerial;
     CalibSensor[iCount].bCalibsensID_set 		= true;
     CalibSensor[iCount].bCalib_complete			= false;
