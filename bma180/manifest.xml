@@ -4,7 +4,7 @@
      bma180
 
   </description>
-  <author>mil1pal</author>
+  <author>Lukas Marti and Nikhil Deshpande</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/bma180</url>
