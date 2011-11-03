@@ -296,8 +296,10 @@ static int init_mjpeg_decoder(int image_width, int image_height)
   avpicture_alloc((AVPicture *)avframe_rgb, PIX_FMT_RGB24, image_width, image_height);
 
   avcodec_context->codec_id = CODEC_ID_MJPEG;
+  avcodec_context->codec_type = AVMEDIA_TYPE_VIDEO;
   avcodec_context->width = image_width;
   avcodec_context->height = image_height;
+  avcodec_context->pix_fmt = PIX_FMT_YUV422P;
 
   avframe_camera_size = avpicture_get_size(PIX_FMT_YUV422P, image_width, image_height);
   avframe_rgb_size = avpicture_get_size(PIX_FMT_RGB24, image_width, image_height);
@@ -314,11 +316,23 @@ static int init_mjpeg_decoder(int image_width, int image_height)
 static void
 mjpeg2rgb(char *MJPEG, int len, char *RGB, int NumPixels)
 {
+  int decoded_len;
   int got_picture;
+  AVPacket avpkt;
+  av_init_packet(&avpkt);
 
   memset(RGB, 0, avframe_rgb_size);
 
-  avcodec_decode_video(avcodec_context, avframe_camera, &got_picture, (uint8_t *) MJPEG, len);
+  //avcodec_decode_video(avcodec_context, avframe_camera, &got_picture, (uint8_t *) MJPEG, len);
+
+  avpkt.size = len;
+  avpkt.data = (unsigned char*)MJPEG;
+  decoded_len = avcodec_decode_video2(avcodec_context, avframe_camera, &got_picture, &avpkt);
+
+  if (decoded_len < 0) {
+      fprintf(stderr, "Error while decoding frame.\n");
+      return;
+  }
 
   if (!got_picture) {
     fprintf(stderr,"Webcam: expected picture but didn't get it...\n");
@@ -870,7 +884,7 @@ void usb_cam_camera_grab_image(usb_cam_camera_image_t *image)
   FD_SET (fd, &fds);
 
   /* Timeout. */
-  tv.tv_sec = 2;
+  tv.tv_sec = 5;
   tv.tv_usec = 0;
 
   r = select(fd+1, &fds, NULL, NULL, &tv);
