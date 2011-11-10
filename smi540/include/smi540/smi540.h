@@ -43,33 +43,38 @@
 #include <libsub.h> // sub20 device
 
 //Define SMI540 specifics
-namespace smi540_cmd {
+namespace smi540_cmd
+{
   //Define MM5 commands
-  static char chRD_ACT_DATA_64[4] = {0x41, 0x99, 0x00, 0x5C};
-  static char chTRIGGER_RESET[4]  = {0x61, 0x03, 0x00, 0xE9};
-  static char chRD_STATUS_A[4]  = {0x40, 0x35, 0x00, 0x4F};
+  static char chRD_ACT_DATA_64[4] = { 0x41, 0x99, 0x00, 0x5C };
+  static char chTRIGGER_RESET[4]  = { 0x61, 0x03, 0x00, 0xE9 };
+  static char chRD_STATUS_A[4]  = { 0x40, 0x35, 0x00, 0x4F };
+
   //Specify MM5 Scale Factor - note: Pos is slightly different from negative
-  const double fSFACC_inv         = 6667;
-  const double fSFGYRO_inv        = 175;
+  const double fSFACC_inv = 6667;
+  const double fSFGYRO_inv = 175;
+
   //Define enumerated sensor type
-  enum eSensorType {eACCEL, eGYRO};
+  enum eSensorType { eACCEL, eGYRO };
+
   //Define default sampling rate
-  const double  dDEFAULT_RATE_Hz = 20;
-  const std::string  sSUB20SERIAL("064E");
-  const unsigned short iMAXNUM_OF_SENSORS = 5;          //Defined by the Xdimax Unit (which supports 5 sensors per box)
+  const double DEFAULT_RATE_Hz = 20;
+  const std::string sSUB20SERIAL("064E");
+  const unsigned short MAX_SENSORS = 5;          //Defined by the Xdimax Unit (which supports 5 sensors per box)
   const unsigned short uSERIALNUMLENGTH   = 20;
 }
 
 //Define measurement output
-struct OneSmi540Meas {
-  bool          bMeasAvailable; //indicates true if a valid measurement is available
-  int           iNumAccels;
-  double        dRateZ[smi540_cmd::iMAXNUM_OF_SENSORS];
-  double        dAccX[smi540_cmd::iMAXNUM_OF_SENSORS];
-  double        dAccY[smi540_cmd::iMAXNUM_OF_SENSORS];
-  ros::Time     dtomeas; //time tag measurement immediately in case of other delays
-  std::string   strSerial;
-  int           iChipSelect[smi540_cmd::iMAXNUM_OF_SENSORS];
+struct OneSmi540Meas
+{
+  bool        bMeasAvailable; //indicates true if a valid measurement is available
+  int         iNumAccels;
+  double      dRateZ[smi540_cmd::MAX_SENSORS];
+  double      dAccX[smi540_cmd::MAX_SENSORS];
+  double      dAccY[smi540_cmd::MAX_SENSORS];
+  ros::Time   dtomeas; //time tag measurement immediately in case of other delays
+  std::string strSerial;
+  int         iChipSelect[smi540_cmd::MAX_SENSORS];
 };
 
 
@@ -115,18 +120,21 @@ public:
 
 private:
   // structure for one smi540 configuration
-  struct OneSmi540Config {
+  struct OneSmi540Config
+  {
     bool bConfigured;
   };
   // structure for one Sub20 device configuration
-  struct OneSub20Config {
+  struct OneSub20Config
+  {
     std::string     strSub20Serial;
     sub_handle      handle_subdev;
     sub_device      subdev;
     bool            bSubSPIConfigured;
-    OneSmi540Config Smi540Cluster[smi540_cmd::iMAXNUM_OF_SENSORS];
+    OneSmi540Config Smi540Cluster[smi540_cmd::MAX_SENSORS];
   };
   std::list<OneSub20Config>   Sub20Device_list;
+
   //subdevice handle for closing the device in destructor
   sub_handle subhndl;
   //status flag indicating if subdevice has been opened
@@ -136,9 +144,9 @@ private:
   //Serial number of subdevice
   std::string strSerial;
   /// Converts SMI540 formatted data into int
-  double mm5data_to_double(char, char, smi540_cmd::eSensorType);
+  double mm5data_to_double( char, char, smi540_cmd::eSensorType );
   /// Configures specified SMI540ies according to the default or user settings
-  void   confsens_on_sub20(OneSub20Config*);
+  void confsens_on_sub20( OneSub20Config* );
 };
 
 

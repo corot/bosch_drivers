@@ -863,18 +863,18 @@ int main(int argc, char **argv) {
         // collect all available chipselect values into one message
         for ( i=0; i<sOneMeas.iNumAccels; i++ ) {
           msg.iChipSelect.push_back(sOneMeas.iChipSelect[i]);
-          msg.fAcclX.push_back(sOneMeas.dAccX[i]);
-          msg.fAcclY.push_back(sOneMeas.dAccY[i]);
-          msg.fAcclZ.push_back(sOneMeas.dAccZ[i]);
+          msg.fAccelX.push_back(sOneMeas.dAccX[i]);
+          msg.fAccelY.push_back(sOneMeas.dAccY[i]);
+          msg.fAccelZ.push_back(sOneMeas.dAccZ[i]);
         }
         msg.header.stamp  = sOneMeas.dtomeas;
         bma180_pub.publish(msg);   // publish to topic!
 
         // clear the message values after publishing to avoid accumulation of further values on subsequent messages.
         msg.iChipSelect.clear();
-        msg.fAcclX.clear();
-        msg.fAcclY.clear();
-        msg.fAcclZ.clear();
+        msg.fAccelX.clear();
+        msg.fAccelY.clear();
+        msg.fAccelZ.clear();
       }
     }
     ros::spinOnce();
