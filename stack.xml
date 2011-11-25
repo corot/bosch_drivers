@@ -4,7 +4,7 @@
      A collection of hardware drivers in use at Bosch RTC.
 
   </description>
-  <author>Maintained by Benjamin Pitzer</author>
+  <author>Benjamin Pitzer, Philip Roan (Maintained by Philip Roan)</author>
   <license>BSD,LGPL</license>  
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/bosch_drivers</url>

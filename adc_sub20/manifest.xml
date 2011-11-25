@@ -4,7 +4,7 @@
      adc_sub20
 
   </description>
-  <author>Nikhil Deshpande</author>
+  <author>Nikhil Deshpande (Maintained by Philip Roan)</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/adc_sub20</url>

@@ -4,7 +4,7 @@
      gumstix_memread_bma180
 
   </description>
-  <author>Nikhil Deshpande</author>
+  <author>Nikhil Deshpande (Maintained by Philip Roan)</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/gumstix_memread_bma180</url>

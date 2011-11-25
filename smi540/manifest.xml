@@ -4,7 +4,7 @@
      smi540
 
   </description>
-  <author>Lukas Marti and Nikhil Deshpande</author>
+  <author>Lukas Marti, Nikhil Deshpande (Maintained by Philip Roan)</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/smi540</url>
