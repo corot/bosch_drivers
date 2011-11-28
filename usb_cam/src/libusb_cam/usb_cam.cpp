@@ -299,11 +299,9 @@ static int init_mjpeg_decoder(int image_width, int image_height)
   avcodec_context->width = image_width;
   avcodec_context->height = image_height;
 
-#if LIBAVCODEC_VERSION_MAJOR > 51
-#if LIBAVCODEC_VERSION_MINOR > 71
+#if LIBAVCODEC_VERSION_MAJOR > 52
   avcodec_context->pix_fmt = PIX_FMT_YUV422P;
   avcodec_context->codec_type = AVMEDIA_TYPE_VIDEO;
-#endif
 #endif
 
   avframe_camera_size = avpicture_get_size(PIX_FMT_YUV422P, image_width, image_height);
@@ -325,8 +323,7 @@ mjpeg2rgb(char *MJPEG, int len, char *RGB, int NumPixels)
 
   memset(RGB, 0, avframe_rgb_size);
 
-#if LIBAVCODEC_VERSION_MAJOR > 51
-#if LIBAVCODEC_VERSION_MINOR > 71
+#if LIBAVCODEC_VERSION_MAJOR > 52
   int decoded_len;
   AVPacket avpkt;
   av_init_packet(&avpkt);
@@ -341,7 +338,6 @@ mjpeg2rgb(char *MJPEG, int len, char *RGB, int NumPixels)
   }
 #else
   avcodec_decode_video(avcodec_context, avframe_camera, &got_picture, (uint8_t *) MJPEG, len);
-#endif
 #endif
 
   if (!got_picture) {
