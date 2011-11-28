@@ -296,10 +296,15 @@ static int init_mjpeg_decoder(int image_width, int image_height)
   avpicture_alloc((AVPicture *)avframe_rgb, PIX_FMT_RGB24, image_width, image_height);
 
   avcodec_context->codec_id = CODEC_ID_MJPEG;
-  avcodec_context->codec_type = AVMEDIA_TYPE_VIDEO;
   avcodec_context->width = image_width;
   avcodec_context->height = image_height;
+
+#if LIBAVCODEC_VERSION_MAJOR > 51
+#if LIBAVCODEC_VERSION_MINOR > 71
   avcodec_context->pix_fmt = PIX_FMT_YUV422P;
+  avcodec_context->codec_type = AVMEDIA_TYPE_VIDEO;
+#endif
+#endif
 
   avframe_camera_size = avpicture_get_size(PIX_FMT_YUV422P, image_width, image_height);
   avframe_rgb_size = avpicture_get_size(PIX_FMT_RGB24, image_width, image_height);
@@ -316,15 +321,16 @@ static int init_mjpeg_decoder(int image_width, int image_height)
 static void
 mjpeg2rgb(char *MJPEG, int len, char *RGB, int NumPixels)
 {
-  int decoded_len;
   int got_picture;
-  AVPacket avpkt;
-  av_init_packet(&avpkt);
 
   memset(RGB, 0, avframe_rgb_size);
 
-  //avcodec_decode_video(avcodec_context, avframe_camera, &got_picture, (uint8_t *) MJPEG, len);
-
+#if LIBAVCODEC_VERSION_MAJOR > 51
+#if LIBAVCODEC_VERSION_MINOR > 71
+  int decoded_len;
+  AVPacket avpkt;
+  av_init_packet(&avpkt);
+  
   avpkt.size = len;
   avpkt.data = (unsigned char*)MJPEG;
   decoded_len = avcodec_decode_video2(avcodec_context, avframe_camera, &got_picture, &avpkt);
@@ -333,6 +339,10 @@ mjpeg2rgb(char *MJPEG, int len, char *RGB, int NumPixels)
       fprintf(stderr, "Error while decoding frame.\n");
       return;
   }
+#else
+  avcodec_decode_video(avcodec_context, avframe_camera, &got_picture, (uint8_t *) MJPEG, len);
+#endif
+#endif
 
   if (!got_picture) {
     fprintf(stderr,"Webcam: expected picture but didn't get it...\n");
