@@ -52,6 +52,7 @@ public:
   std::string io_method_name_;
   int image_width_,image_height_;
   std::string pixel_format_name_;
+  bool autofocus_;
 
   sensor_msgs::CameraInfo info_;
 
@@ -73,7 +74,7 @@ public:
     node_.param("image_width", image_width_, 640);
     node_.param("image_height", image_height_, 480);
     node_.param("pixel_format", pixel_format_name_, std::string("mjpeg")); // possible values: yuyv, uyvy, mjpeg
-
+    node_.param("autofocus", autofocus_, false); // enable/disable autofocus
 
     {
       XmlRpc::XmlRpcValue double_list;
@@ -128,6 +129,7 @@ public:
     printf("usb_cam image_width set to [%d]\n", image_width_);
     printf("usb_cam image_height set to [%d]\n", image_height_);
     printf("usb_cam pixel_format set to [%s]\n", pixel_format_name_.c_str());
+    printf("usb_cam auto_focus set to [%d]\n", autofocus_);
 
     usb_cam_io_method io_method;
     if(io_method_name_ == "mmap")
@@ -161,6 +163,10 @@ public:
         pixel_format,
         image_width_,
         image_height_);
+
+    if(autofocus_) {
+      usb_cam_camera_set_auto_focus(1);
+    }
 
     next_time_ = ros::Time::now();
     count_ = 0;

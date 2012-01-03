@@ -66,6 +66,8 @@ usb_cam_camera_image_t *usb_cam_camera_start(const char* dev, usb_cam_io_method 
 void usb_cam_camera_shutdown(void);
 // grabs a new image from the camera
 void usb_cam_camera_grab_image(usb_cam_camera_image_t *image);
+// enables/disable auto focus
+void usb_cam_camera_set_auto_focus(int value);
 
 #endif
 
