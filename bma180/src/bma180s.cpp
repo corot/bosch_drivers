@@ -61,9 +61,9 @@ Bma180::Bma180( double max_acceleration_g, double dBandwidth_Hz, bool bCalibrate
   sub_handle        sub20handle;
   OneSub20Config    OneSub20Configuration;
 
-  ROS_INFO("Max acceleration entered: %f [g].", max_acceleration_g);
-  ROS_INFO("Sensor bandwidth entered: %f [Hz].", dBandwidth_Hz);
-  ROS_INFO("Sensor Reading Rate entered: %f [Hz].", dRate_Hz);
+  printf("Max acceleration entered: %f [g].\n", max_acceleration_g);
+  printf("Sensor bandwidth entered: %f [Hz].\n", dBandwidth_Hz);
+  printf("Sensor Reading Rate entered: %f [Hz].\n", dRate_Hz);
 
   //Retrieve calibration data from user
   set_calibstatus( bCalibrate );
@@ -75,7 +75,7 @@ Bma180::Bma180( double max_acceleration_g, double dBandwidth_Hz, bool bCalibrate
   {
     iElCount++;
   };
-  ROS_INFO("Range chosen G:: %f ", bma180_cmd::dFULLRANGELOOKUP[iElCount]);
+  printf("Range chosen: %f [g].\n", bma180_cmd::dFULLRANGELOOKUP[iElCount]);
 
   chMaxAccRange_selected = bma180_cmd::COMMAND_FULLSCALE_G[iElCount];
   
@@ -86,7 +86,7 @@ Bma180::Bma180( double max_acceleration_g, double dBandwidth_Hz, bool bCalibrate
   {
     iElCount++;
   };
-  ROS_INFO("Range chosen BW:: %f ", bma180_cmd::dBWLOOKUP[iElCount]);
+  printf("Range chosen BW: %f.\n", bma180_cmd::dBWLOOKUP[iElCount]);
 
   chBW_selected = bma180_cmd::COMMAND_BANDWIDTH_HZ[iElCount];
 
@@ -102,7 +102,7 @@ Bma180::Bma180( double max_acceleration_g, double dBandwidth_Hz, bool bCalibrate
       sub20Serial.clear();
       sub20Serial.resize( bma180_cmd::uSERIALNUMLENGTH );
       sub_get_serial_number( sub20handle, const_cast<char*>(sub20Serial.c_str()), sub20Serial.size() );
-      ROS_INFO( "Serial Number: %s", sub20Serial.c_str() );
+      printf( "Serial Number: %s.\n", sub20Serial.c_str() );
       if( strcmp(sub20Serial.c_str(), sSub20Serial.c_str()) == 0 )
       {
         subhndl = sub20handle;
@@ -134,7 +134,7 @@ Bma180::Bma180( double max_acceleration_g, double dBandwidth_Hz, bool bCalibrate
         }
         else
 	{
-          ROS_INFO("ERROR - SPI Configuration : %d not accepted by device", iSPI_cfg_set);
+          ROS_INFO("ERROR! SPI Configuration %d not accepted by device.\n", iSPI_cfg_set);
 
           // Subdevice could not be configured
           OneSub20Configuration.bSubSPIConfigured = false;
@@ -196,7 +196,7 @@ void Bma180::GetMeasurements( std::list<OneBma180Meas> &list_meas )
   int               error_code, dummy, j = 0;
   bool              SPIMeas = false;
   OneBma180Meas     sMeas;
-  ros::Time         dtomeas;
+  //ros::Time         dtomeas;
   char              chCMD;
   std::stringstream ss_errmsg;
   int               chip_select;
@@ -330,12 +330,12 @@ void Bma180::GetMeasurements( std::list<OneBma180Meas> &list_meas )
                         bExecuteCalibration = false;
                         throw std::string( "Biases cannot be written into EEPROM. Calibration procedure aborted.");
                       };
-                      ROS_INFO("EEPROM has been written.");
+                      ROS_INFO("EEPROM has been written.\n");
 
                     }
                     else
 		    {
-                      ROS_INFO("EEPROM write aborted.");
+                      ROS_INFO("EEPROM write aborted.\n");
                     }
                   }
                   else
@@ -369,7 +369,7 @@ void Bma180::GetMeasurements( std::list<OneBma180Meas> &list_meas )
     // Only publish data after all data for all chipSelects is collected
     if( SPIMeas )
     {
-      sMeas.dtomeas = ros::Time::now();
+      //sMeas.dtomeas = ros::Time::now();
       sMeas.bMeasAvailable = true;
       sMeas.serial_number = iterat->strSub20Serial;
       
@@ -586,9 +586,9 @@ void Bma180::confsens_on_sub20( OneSub20Config *pOneSub20Conf, char chFullscale,
     // Verify if a BMA180 is connected on the respective ChipSelect
     if( error_code == 0 && 0 < (unsigned short)chCHIP_ID && 0 < (unsigned short)chALML_VER )
     {
-      ROS_INFO("BMA 180 - Chip Select %d", chip_select);
-      ROS_INFO("CHIP ID: %u ", (unsigned short)chCHIP_ID);
-      ROS_INFO("ALML Ver: %u ", (unsigned short)chALML_VER);
+      ROS_INFO("BMA 180 - Chip Select %d\n", chip_select);
+      ROS_INFO("CHIP ID: %u\n", (unsigned short)chCHIP_ID);
+      ROS_INFO("ALML Ver: %u\n", (unsigned short)chALML_VER);
 
       // call method to set ee_write flag
       bEE_RWsuccess &= write_bit_eeprom_sub20( bma180_cmd::ADDRESS_CTRLREG0, 4, 1, bma180_cmd::COMMAND_SET_EEW, chip_select, handle_sub20 );
@@ -606,8 +606,8 @@ void Bma180::confsens_on_sub20( OneSub20Config *pOneSub20Conf, char chFullscale,
       bEE_RWsuccess &= read_byte_eeprom_sub20( bma180_cmd::ADDRESS_BWTCS, &chREGSTATUS, chip_select, handle_sub20 );
       // Extract range
       pOneSub20Conf->Bma180Cluster[chip_select].dSensorBandwidth = bma180_cmd::dBWLOOKUP[((unsigned short)((chREGSTATUS & 0xF0)>>4))];
-      ROS_INFO("EEPROM stored Fullrange: %f [g] ", pOneSub20Conf->Bma180Cluster[chip_select].dFullScaleRange);
-      ROS_INFO("EEPROM stored Bandwidth: %f [Hz]", pOneSub20Conf->Bma180Cluster[chip_select].dSensorBandwidth);
+      ROS_INFO("EEPROM stored Fullrange: %f [g]\n", pOneSub20Conf->Bma180Cluster[chip_select].dFullScaleRange);
+      ROS_INFO("EEPROM stored Bandwidth: %f [Hz]\n", pOneSub20Conf->Bma180Cluster[chip_select].dSensorBandwidth);
 
       // Read bias that are currently stored in image
       bEE_RWsuccess &= read_biassettings( handle_sub20, chip_select, &uiBiasX, &uiBiasY, &uiBiasZ );
@@ -632,7 +632,7 @@ void Bma180::confsens_on_sub20( OneSub20Config *pOneSub20Conf, char chFullscale,
     }
     else
     {
-      ROS_INFO("BMA 180 %d: No sensor detected ", chip_select);
+      ROS_INFO("BMA 180 %d: No sensor detected\n", chip_select);
 
       // Set flag that sensor hasn't been initialized
       pOneSub20Conf->Bma180Cluster[chip_select].bConfigured = false;
@@ -765,7 +765,7 @@ bool Bma180::set_biassettings( sub_handle handle_sub20, int chip_select, unsigne
       else
       {
         bSuccess = false;
-        ROS_WARN("Cannot write BMA180 image.");
+        ROS_WARN("Cannot write BMA180 image.\n");
       }
     }
     else
@@ -780,7 +780,7 @@ bool Bma180::set_biassettings( sub_handle handle_sub20, int chip_select, unsigne
 
       if( bEE_RWsuccess )
       {
-        ROS_INFO("BMA180 EEPROM written.");
+        ROS_INFO("BMA180 EEPROM written.\n");
         bSuccess = true;
       }
       else
@@ -884,7 +884,7 @@ int main(int argc, char **argv)
 
     catch( std::string e )
     {
-      ROS_ERROR( "An exception occurred: %s", e.c_str() );
+      ROS_ERROR( "An exception occurred: %s\n", e.c_str() );
       std::exit(1);
     }
 
