@@ -31,3 +31,5 @@ rosbuild_genmsg()
 
 rosbuild_add_executable(bma180 src/bma180_calibrate src/bma180.cpp)
 target_link_libraries(bma180 sub20)
+
+rosbuild_add_executable(bma180s src/bma180_calibrate src/bma180s.cpp)
