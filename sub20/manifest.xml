@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/sub20</url>
 
-  <rosdep name="libusb-1.0"/>
+  <rosdep name="libusb-1.0-dev"/>
   
   <export>
     <cpp cflags="-I${prefix}/src" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsub20"/>
