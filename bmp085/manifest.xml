@@ -1,0 +1,17 @@
+<package>
+  <description brief="bmp085">
+
+     bmp085
+
+  </description>
+  <author>Philip Roan</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bmp085</url>
+  <depend package="roscpp"/>
+  <depend package="hardware_gpio"/>
+  <depend package="sub20"/>
+
+</package>
+
+
