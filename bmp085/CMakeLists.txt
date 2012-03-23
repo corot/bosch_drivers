@@ -27,8 +27,8 @@ rosbuild_add_compile_flags(bmp085_bst "-x c++")
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
-rosbuild_add_executable(bmp085_testbench src/testbench_bmp085.cpp)
-target_link_libraries(bmp085_testbench bmp085_bst sub20)
+rosbuild_add_executable(bmp085_w_sub20 src/bmp085_w_sub20.cpp)
+target_link_libraries(bmp085_w_sub20 bmp085_bst sub20)
 
 
 # Build and link fresh driver:
