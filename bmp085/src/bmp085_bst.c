@@ -2,28 +2,32 @@
  *  $Revision: 1.2 $
  */
 
-/*
- * Copyright (C) 2009 Bosch Sensortec GmbH
+/** BMP085 Pressure Sensor API
+ * Copyright (C) 2009 Bosch Sensortec GmbH and (C) 2012 Rober Bosch LLC 
  *
- * BMP085 pressure sensor API
- * 
- * Usage:  Application Programming Interface for BMP085 configuration and data read out
+ * \section intro_sec Introduction
+ * BMP085 digital Altimeter Programming Interface
+ * The BMP085 API enables quick access to Bosch Sensortec's digital altimeter.
+ * The only mandatory steps are: 
+ *
+ * 1. linking the target application's communication functions to the API (\ref BMP085_WR_FUNC_PTR, \ref BMP085_RD_FUNC_PTR)
+ *
+ * 2. calling the bmp085_init() routine, which initializes all necessary data structures for using all functions
+ *
  *
  * 
- * \section disclaimer_sec Disclaimer
+ * \section license_sec License
  *
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in 
  * compliance with the License and the following stipulations. The Apache License , Version 2.0 is applicable unless 
- *  otherwise stated by the stipulations of the disclaimer below. 
+ * otherwise stated by the stipulations of the disclaimer below. 
  * 
  * You may obtain a copy of the License at 
- * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  *
- *
- * Disclaimer 
+ * \section disclaimer_sec Disclaimer
  *
  * Common:
  * This Work is developed for the consumer goods industry. It may only be used 
@@ -67,9 +71,6 @@
  * subject to change without notice.
  *
  */
-
-
-
 
 
 /*! \file bmp085_bst.c

@@ -1,18 +1,19 @@
-/*
+/** \mainpage BMP085 Barometric Pressure Sensor API
  * Copyright (C) 2012 Robert Bosch LLC
  *
- * \section disclaimer_sec Disclaimer
+ * \section intro_sec Introduction
+ * The BMP085 API enables quick access to Bosch Sensortec's digital barometric pressure sensor and altimeter.
  *
+ * \section license_sec License
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in 
  * compliance with the License and the following stipulations. The Apache License , Version 2.0 is applicable unless 
- *  otherwise stated by the stipulations of the disclaimer below. 
+ * otherwise stated by the stipulations of the disclaimer below. 
  * 
  * You may obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Disclaimer 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * \section disclaimer_sec Disclaimer 
  *
  * Common:
  * This Work is developed for the consumer goods industry. It may only be used 
@@ -58,7 +59,7 @@
  */
 
 
-//\Author Philip Roan, Bosch LLC
+//\Author Philip Roan, Robert Bosch LLC
 
 //ROS Headers
 #include <ros/ros.h>

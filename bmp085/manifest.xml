@@ -1,7 +1,7 @@
 <package>
   <description brief="bmp085">
 
-     bmp085
+     This package contains a driver for the Bosch Sensortec BMP085 barometric pressure sensor. A specific implementation of the driver using a Sub20 device from Xdimax is also included. This implementation can be modified to work with other hardware interfaces, such as the Arduino.
 
   </description>
   <author>Philip Roan</author>
