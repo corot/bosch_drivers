@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -47,122 +48,122 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <linux/serial.h>
+
 #include "amtec_io.h"
+
 
 //#define IO_DEBUG
 
-int iParity(enum PARITY_TYPE par)
+int getAttrParity( enum PARITY_TYPE par )
 {
-  if (par == N)
-    return (IGNPAR);
+  if( par == N ) // No parity
+  {
+    return IGNPAR;
+  }
   else
-    return (INPCK);
+  {
+    return INPCK;
+  }
 }
-
-int iSoftControl(int flowcontrol)
+    
+int getAttrSWFlowControl( int flowcontrol )
 {
-  if (flowcontrol)
-    return (IXON);
+  if( flowcontrol )
+  {
+    return IXON;
+  }
   else
-    return (IXOFF);
+  {
+    return IXOFF;
+  }
 }
-
-int cDataSize(int numbits)
+	
+int getAttrBitsPerByte(size_t bits_per_byte )
 {
-  switch (numbits) {
+  switch( bits_per_byte )
+  {
   case 5:
-    return (CS5);
-    break;
+    return CS5;
   case 6:
-    return (CS6);
-    break;
+    return CS6;
   case 7:
-    return (CS7);
-    break;
+    return CS7;
   case 8:
-    return (CS8);
-    break;
   default:
-    return (CS8);
-    break;
+    return CS8;
   }
 }
-
-int cStopSize(int numbits)
+	    
+int getAttrStopBits(int stop_bits)
 {
-  if (numbits == 2)
-    return (CSTOPB);
+  if( stop_bits == 2 )
+  {
+    return CSTOPB;
+  }
   else
-    return (0);
+  {
+    return 0;
+  }
 }
-
-int cFlowControl(int flowcontrol)
+		
+int getAttrFlowControl( int flowcontrol )
 {
-  if (flowcontrol)
-    return (CRTSCTS);
+  if( flowcontrol )
+  {
+    return CRTSCTS;
+  }
   else
-    return (CLOCAL);
+  {
+    return CLOCAL;
+  }
 }
-
-int cParity(enum PARITY_TYPE par)
+		    
+int getAttrParityType(enum PARITY_TYPE par)
 {
-  if (par != N) {
-    if (par == O)
-      return (PARENB | PARODD);
-    else
-      return (PARENB);
-  } else
-    return (0);
+  if( par == N) // No parity
+  {
+    return 0;
+  }
+
+  if( par == O) // Odd parity
+  {
+    return ( PARENB | PARODD );
+  }
+  else // Even parity
+  {
+    return PARENB;
+  }
 }
-
-int cBaudrate(int baudrate)
+			
+int getAttrBaudRate(int baud_rate)
 {
-  switch (baudrate) {
-  case 0:
-    return (B0);
-    break;
-  case 300:
-    return (B300);
-    break;
-  case 600:
-    return (B600);
-    break;
-  case 1200:
-    return (B1200);
-    break;
-  case 2400:
-    return (B2400);
-    break;
+  switch( baud_rate ) 
+  {
   case 4800:
-    return (B4800);
-    break;
+    return B4800;
   case 9600:
-    return (B9600);
-    break;
+    return B9600;
+#ifdef B14400
+  case 14400:
+    return B14400;
+#endif
   case 19200:
-    return (B19200);
-    break;
+    return B19200;
+#ifdef B28800
+  case 28800:
+    return B28800;
+#endif
   case 38400:
-    return (B38400);
-    break;
+    return B38400;
   case 57600:
-    return (B57600);
-    break;
+    return B57600;
   case 115200:
-    return (B115200);
-    break;
-  case 500000:
-    /* to use 500k you have to change the entry of B460800 in you kernel:
-     /usr/src/linux/drivers/usb/serial/ftdi_sio.h:
-     ftdi_8U232AM_48MHz_b460800 = 0x0006    */
-    return (B460800);
-    break;
+    return B115200;
   default:
-    return (B9600);
-    break;
+    return B9600;
   }
 }
-
+			    
 long bytesWaiting(int sd)
 {
   long available = 0;
@@ -171,57 +172,59 @@ long bytesWaiting(int sd)
   else
     return -1;
 }
-
+				  
 void amtecDeviceSetParams(amtec_powercube_device_p dev)
 {
   struct termios ctio;
-
+				      
   tcgetattr(dev->fd, &ctio); /* save current port settings */
-
-  ctio.c_iflag = iSoftControl(dev->swf) | iParity(dev->parity);
+					
+  ctio.c_iflag = getAttrSWFlowControl( dev->swf )
+               | getAttrParity( dev->parity );
   ctio.c_oflag = 0;
-  ctio.c_cflag = CREAD | cFlowControl(dev->hwf || dev->swf)
-                       | cParity(dev->parity)
-                       | cDataSize(dev->databits)
-                       | cStopSize(dev->stopbits);
+  ctio.c_cflag = CREAD
+               | getAttrFlowControl( dev->hwf || dev->swf )
+               | getAttrParityType( dev->parity )
+               | getAttrBitsPerByte( dev->databits )
+               | getAttrStopBits( dev->stopbits );
   ctio.c_lflag = 0;
   ctio.c_cc[VTIME] = 0; /* inter-character timer unused */
   ctio.c_cc[VMIN] = 0; /* blocking read until 0 chars received */
-
-  cfsetispeed(&ctio, (speed_t) cBaudrate(dev->baud));
-  cfsetospeed(&ctio, (speed_t) cBaudrate(dev->baud));
-
+						    
+  cfsetispeed(&ctio, (speed_t) getAttrBaudRate(dev->baud));
+  cfsetospeed(&ctio, (speed_t) getAttrBaudRate(dev->baud));
+							
   tcflush(dev->fd, TCIFLUSH);
   tcsetattr(dev->fd, TCSANOW, &ctio);
 }
-
-void amtecDeviceSetBaudrate(amtec_powercube_device_p dev, int brate)
+							    
+void amtecDeviceSetBaudrate(amtec_powercube_device_p dev, int baud_rate)
 {
   struct termios ctio;
-
+								
   tcgetattr(dev->fd, &ctio); /* save current port settings */
-
-  cfsetispeed(&ctio, (speed_t) cBaudrate(brate));
-  cfsetospeed(&ctio, (speed_t) cBaudrate(brate));
-
+								  
+  cfsetispeed(&ctio, (speed_t) getAttrBaudRate(baud_rate));
+  cfsetospeed(&ctio, (speed_t) getAttrBaudRate(baud_rate));
+								      
   tcflush(dev->fd, TCIFLUSH);
   tcsetattr(dev->fd, TCSANOW, &ctio);
 }
-
+									  
 int amtecDeviceConnectPort(amtec_powercube_device_p dev)
 {
   fprintf(stderr, "\nset device:\n");
   fprintf(stderr, "   port   = %s\n", dev->ttyport);
   fprintf(stderr, "   baud   = %d\n", dev->baud);
-  fprintf(stderr, "   params = %d%s%d\n", dev->databits,
-                                          dev->parity == N ? "N": dev->parity == O ? "O" : "E",
-                                          dev->stopbits);
-  if ((dev->fd = open((dev->ttyport), (O_RDWR | O_NOCTTY), 0)) < 0)
-    return (-1);
+  fprintf(stderr, "   params = %d%s%d\n", dev->databits, ( dev->parity == N ? "N": ( dev->parity == O ? "O" : "E" )), dev->stopbits );
+  if( (dev->fd = open((dev->ttyport), (O_RDWR | O_NOCTTY), 0)) < 0 )
+  {
+    return -1;
+  }
   amtecDeviceSetParams(dev);
-  return (dev->fd);
+  return dev->fd;
 }
-
+											  
 int waitForETX(int fd, unsigned char *buf, int *len)
 {
   static int pos, loop, val;
@@ -237,14 +240,14 @@ int waitForETX(int fd, unsigned char *buf, int *len)
       read(fd, &(buf[pos]), val);
 #ifdef IO_DEBUG
       for(i=0;i<val;i++)
-      fprintf(stderr, "[0x%s%x]", buf[pos+i]<16?"0":"", buf[pos+i]);
+	fprintf(stderr, "[0x%s%x]", buf[pos+i]<16?"0":"", buf[pos+i]);
 #endif
       if (buf[pos + val - 1] == B_ETX) {
-        *len = pos + val - 1;
+	*len = pos + val - 1;
 #ifdef IO_DEBUG
-        fprintf(stderr, "\n");
+	fprintf(stderr, "\n");
 #endif
-        return (1);
+	return (1);
       }
       pos += val;
     } else {
@@ -257,7 +260,7 @@ int waitForETX(int fd, unsigned char *buf, int *len)
 #endif
   return (0);
 }
-
+													  
 int waitForAnswer(int fd, unsigned char *buf, int *len)
 {
   int loop = 0;
@@ -272,7 +275,7 @@ int waitForAnswer(int fd, unsigned char *buf, int *len)
       fprintf(stderr, "(0x%s%x)", buf[0]<16?"0":"", buf[0]);
 #endif
       if (buf[0] == B_STX) {
-        return (waitForETX(fd, buf, len));
+	return (waitForETX(fd, buf, len));
       }
     } else {
       usleep(1000);
@@ -284,7 +287,7 @@ int waitForAnswer(int fd, unsigned char *buf, int *len)
 #endif
   return (0);
 }
-
+															
 int writeData(int fd, unsigned char *buf, int nChars)
 {
   int written = 0;
@@ -300,7 +303,7 @@ int writeData(int fd, unsigned char *buf, int nChars)
   }
   return 1;
 }
-
+																
 int amtecSendCommand(amtec_powercube_device_p dev, int id, unsigned char *cmd, int len)
 {
   static int i, ctr, add;
@@ -308,7 +311,7 @@ int amtecSendCommand(amtec_powercube_device_p dev, int id, unsigned char *cmd, i
   static unsigned char bcc;
   static unsigned char umnr;
   static unsigned char lmnr;
-
+																	    
 #ifdef IO_DEBUG
   fprintf(stderr, "\n---> ");
   for(i=0;i<len;i++) {
@@ -316,7 +319,7 @@ int amtecSendCommand(amtec_powercube_device_p dev, int id, unsigned char *cmd, i
   }
   fprintf(stderr, "\n");
 #endif
-
+																		  
   add = 0;
   lmnr = id & 7;
   lmnr = lmnr << 5;
@@ -373,7 +376,7 @@ int amtecSendCommand(amtec_powercube_device_p dev, int id, unsigned char *cmd, i
     rcmd[ctr++] = bcc;
   }
   rcmd[ctr++] = B_ETX;
-
+																						    
 #ifdef IO_DEBUG
   fprintf(stderr, "-*-> ");
   for(i=0;i<ctr;i++) {
@@ -381,60 +384,67 @@ int amtecSendCommand(amtec_powercube_device_p dev, int id, unsigned char *cmd, i
   }
   fprintf(stderr, "\n");
 #endif
-
-  if (writeData(dev->fd, rcmd, ctr)) {
+																							  
+  if (writeData(dev->fd, rcmd, ctr))
+  {
     return (1);
-  } else {
+  }
+  else
+  {
     return (0);
   }
 }
-
+																							    
 void convertBuffer(unsigned char *cmd, int *len)
 {
   int i, j;
-  for (i = 0; i < *len; i++) {
-    if (cmd[i] == B_DLE) {
-      switch (cmd[i + 1]) {
+  for (i = 0; i < *len; i++)
+  {
+    if (cmd[i] == B_DLE)
+    {
+      switch (cmd[i + 1])
+      {
       case 0x82:
-        cmd[i] = 0x02;
-        for (j = i + 2; j < *len; j++)
-          cmd[j - 1] = cmd[j];
-        (*len)--;
-        break;
+	cmd[i] = 0x02;
+	for (j = i + 2; j < *len; j++)
+	  cmd[j - 1] = cmd[j];
+	(*len)--;
+	break;
       case 0x83:
-        cmd[i] = 0x03;
-        for (j = i + 2; j < *len; j++)
-          cmd[j - 1] = cmd[j];
-        (*len)--;
-        break;
+	cmd[i] = 0x03;
+	for (j = i + 2; j < *len; j++)
+	  cmd[j - 1] = cmd[j];
+	(*len)--;
+	break;
       case 0x90:
-        cmd[i] = 0x10;
-        for (j = i + 2; j < *len; j++)
-          cmd[j - 1] = cmd[j];
-        (*len)--;
-        break;
+	cmd[i] = 0x10;
+	for (j = i + 2; j < *len; j++)
+	  cmd[j - 1] = cmd[j];
+	(*len)--;
+	break;
       }
     }
   }
 }
-
+																								  
 int amtecGetAnswer(amtec_powercube_device_p dev, unsigned char *cmd, int *len)
 {
 #ifdef IO_DEBUG
   int i;
 #endif
-  if (waitForAnswer(dev->fd, cmd, len)) {
+  if (waitForAnswer(dev->fd, cmd, len))
+  {
 #ifdef IO_DEBUG
     fprintf(stderr, "<=== ");
     for(i=0;i<*len;i++)
-    fprintf(stderr, "[0x%s%x]", cmd[i]<16?"0":"", cmd[i]);
+      fprintf(stderr, "[0x%s%x]", cmd[i]<16?"0":"", cmd[i]);
     fprintf(stderr, "\n");
 #endif
     convertBuffer(cmd, len);
 #ifdef IO_DEBUG
     fprintf(stderr, "<=p= ");
     for(i=0;i<*len;i++)
-    fprintf(stderr, "[0x%s%x]", cmd[i]<16?"0":"", cmd[i]);
+      fprintf(stderr, "[0x%s%x]", cmd[i]<16?"0":"", cmd[i]);
     fprintf(stderr, "\n");
 #endif
     return (1);

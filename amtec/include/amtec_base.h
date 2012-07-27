@@ -314,5 +314,3 @@ void amtecPrintParams(amtec_powercube_params_p params);
 
 #endif
 
-
-
