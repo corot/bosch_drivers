@@ -1,0 +1,20 @@
+<package>
+  <description brief="bosch_drivers_basic_nodes">
+
+     This package contains basic nodes for running Bosch MEMS sensors. The nodes
+     also serve as examples. Further examples can be found in bosch_drivers_examples.
+
+  </description>
+  <author>Joshua Vasquez, Philip Roan. Maintained by Philip Roan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bosch_drivers_basic_nodes</url>
+  <depend package="bosch_drivers_common"/>
+  <depend package="arduino_interface"/>
+  <depend package="sub20_interface"/>
+  <depend package="bmc050_driver"/>
+  <depend package="bmp085_driver"/>
+  <depend package="bma180_driver"/> 
+</package>
+
+
