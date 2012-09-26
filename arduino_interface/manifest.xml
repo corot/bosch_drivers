@@ -1,0 +1,41 @@
+<package>
+  <description brief="arduino_interface">
+
+     The arduino_interface class contains details specifics to 
+     interfacing sensors with software using an Arduino as
+     the physical hardware interface.  
+     
+     Each instantiation of this class is specific to an 
+     Arduino hardware device, indentified by the serial port  name.
+     
+     NOTE: To use this package, you must deactivate the Arduino's
+     pullups on the SDA and SCL lines. By default, these pullups are
+     enabled. To deactivate them, you must open the Wire library in 
+     your libraries folder and comment out two lines in the twi.c 
+     sketch.
+     
+     This class inherits the bosch_drivers_hardware_interface
+     base class. In this manner, specific bosch_drivers_sensor_driver
+     classes can access sensor data through the virtual functions provided by 
+     the parent bosch_drivers_hardware_interface class.
+
+     The arduino_firmware directory contains a makefile and .ino code for
+     building the hex files to upload to the Arduino. After a `make', type
+     `make upload' to upload to firmware to the Arduino.
+
+  </description>
+  <author>Joshua Vasquez and Philip Roan. Maintained by Philip Roan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/arduino_interface</url>
+  <depend package="roscpp"/>
+  <depend package="bosch_drivers_common"/>
+  <depend package="uniserial"/>
+
+  <!-- Export the header files so library can be used by other packages. -->
+  <export>
+    <cpp cflags="-I${prefix}/include/arduino_interface" lflags="-L${prefix}/lib -larduino_interface"/>
+  </export>
+</package>
+
+

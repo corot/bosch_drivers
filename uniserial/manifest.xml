@@ -1,0 +1,25 @@
+<package>
+  <description brief="uniserial">
+
+     This class provides Unix machines with access to serial devices 
+     through serial ports. Essentially, this class is a wrapper of the 
+     Unix-specific function calls to (1) establish a connection,
+     (1)read a single byte, and (1)write a single byte. The default 
+     constructer's parameters are set to 8-bit packets, No parity, and
+     1 stop bit; however, custom parameters can be set using the 
+     initialize(args..) method rather than the initialize() method.  
+
+  </description>
+  <author>Joshua Vasquez and Philip Roan. Maintained by Philip Roan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/uniserial</url>
+  <depend package="roscpp"/>
+
+  <!-- Export the header files so library can be used by other packages. -->
+  <export>
+     <cpp cflags="-I${prefix}/include/uniserial" lflags="-L${prefix}/lib -luniserial"/>
+  </export>
+</package>
+
+
