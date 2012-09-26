@@ -1,0 +1,22 @@
+<package>
+  <description brief="bmc050_driver">
+
+     bmc050
+
+  </description>
+  <author>Joshua Vasquez, Philip Roan. Maintained by Philip Roan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bmc050</url>
+  <depend package="bosch_drivers_common"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include/bmc050_driver" lflags="-L${prefix}/lib -lbmc050"/>
+  </export>
+  <export>
+    <cpp cflags="-I${prefix}/include/bmc050_driver" lflags="-L${prefix}/lib -lbmc050_parameters"/>
+  </export>
+
+</package>
+
+
