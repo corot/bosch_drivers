@@ -1,0 +1,21 @@
+<package>
+  <description brief="bosch_drivers_example_nodes">
+
+     This package contains example ROS nodes sampling various sensors
+     using various protocols on various hardware interfaces.  
+     Note: not all possible combinations contain examples.
+
+  </description>
+  <author>Joshua Vasquez, Philip Roan. Maintained by Philip Roan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bosch_drivers_example_nodes</url>
+  <depend package="bosch_drivers_common"/>
+  <depend package="arduino_interface"/>
+  <depend package="sub20_interface"/>
+  <depend package="bmc050_driver"/>
+  <depend package="bmp085_driver"/>
+  <depend package="bma180_driver"/> 
+</package>
+
+
