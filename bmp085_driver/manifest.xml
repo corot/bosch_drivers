@@ -1,0 +1,27 @@
+<package>
+  <description brief="bmp085_driver">
+
+    The bmp085_driver class provides the user with sensor-specific 
+    methods to access the temperature and pressure data on the bmp085
+    sensor. This class addresses the sensor through a hardware
+    interface using generic function calls common to all hardware
+    interfaces.  In this manner, the driver is independent of the 
+    hardware device acting as a passthrough.  
+  
+</description>
+  <author>Joshua Vasquez, Philip Roan. Maintained by Philip Roan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bmp085</url>
+  <depend package="bosch_drivers_common"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include/bmp085_driver" lflags="-L${prefix}/lib -lbmp085"/>
+  </export>
+  <export>
+    <cpp cflags="-I${prefix}/include/bmp085_driver" lflags="-L${prefix}/lib -lbmp085_parameters"/>
+  </export>
+
+</package>
+
+
