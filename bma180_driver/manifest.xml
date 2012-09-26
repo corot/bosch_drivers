@@ -1,0 +1,26 @@
+<package>
+  <description brief="bma180_driver">
+
+  The bma180_driver class provides the user with sensor-specific 
+  methods to access the temperature and acceleration data on the 
+  bma180 sensor. This class addresses the sensor through a hardware
+  interface using generic function calls common to all hardware
+  interfaces. In this manner, the driver is independent of the 
+  hardware device acting as a passthrough.  
+  
+  </description>
+  <author>Joshua Vasquez, Philip Roan. Maintained by Philip Roan</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/bma180</url>
+  <depend package="bosch_drivers_common"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include/bma180_driver" lflags="-L${prefix}/lib -lbma180"/>
+  </export>
+  <export>
+    <cpp cflags="-I${prefix}/include/bma180_driver" lflags="-L${prefix}/lib -lbma180_parameters"/>
+  </export>
+  
+</package>
+
