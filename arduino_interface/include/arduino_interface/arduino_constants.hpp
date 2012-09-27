@@ -44,7 +44,7 @@
  * and the \p NULL_DEVICE definition.
  */
 
-//#include <bosch_drivers_common.hpp>
+#include <bosch_drivers_common.hpp>
 
 namespace bosch_drivers_common
 {
