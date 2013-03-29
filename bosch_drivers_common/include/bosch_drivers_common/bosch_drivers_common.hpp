@@ -64,7 +64,7 @@ namespace bosch_drivers_common
    * This enumeration is used on the Arduino and on the host PC. To optimize the
    * arduino code, compile with the -fshort-enums flag.
    */
-  enum interface_protocol { I2C, SPI, GPIO, RS232, RS485, ETHERNET, ETHERCAT, CAN, JTAG, PROFIBUS, MODBUS, USB };
+  enum interface_protocol { I2C, SPI, GPIO, RS232, RS485, ETHERNET, ETHERCAT, CAN, JTAG, PROFIBUS, MODBUS, USB, PWM };
   
 
         
@@ -111,6 +111,12 @@ namespace bosch_drivers_common
   
   
   // \brief This constant is used to specify an SPI device with no chip select.
-  static const uint8_t  NULL_DEVICE = 0xFF;
+  static const uint8_t NULL_DEVICE = 0xFF;
+
+  /**
+   * \brief GPIO Constants
+   *
+   */
+  enum gpio_input_modes { FLOATING, PULLUP, PULLDOWN };
 }
 #endif // BOSCH_DRIVERS_COMMON_H_
