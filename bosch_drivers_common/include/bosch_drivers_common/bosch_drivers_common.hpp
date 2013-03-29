@@ -117,6 +117,6 @@ namespace bosch_drivers_common
    * \brief GPIO Constants
    *
    */
-  enum gpio_input_modes { FLOATING, PULLUP, PULLDOWN };
+  enum gpio_input_mode { FLOATING, PULLUP, PULLDOWN };
 }
 #endif // BOSCH_DRIVERS_COMMON_H_
