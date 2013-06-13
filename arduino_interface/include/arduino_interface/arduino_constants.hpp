@@ -78,6 +78,11 @@ namespace bosch_drivers_common
 
   static const uint8_t READ = 0;
   static const uint8_t WRITE = 1;
+  
+  /**
+   * \brief ADC constants
+   */
+  uint16_t MAX_ADC_VALUE = 1023;
 
   //static const std::string FIRMWARE_VERSION = "BI.1.0" // Bosch IMU v 1.0
 }

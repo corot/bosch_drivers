@@ -34,7 +34,7 @@
  *
  *********************************************************************/
 
-//\Author Joshua Vasquez and Philip Roan, Robert Bosch LLC
+//\Author Joshua Vasquez, Kai Franke, and Philip Roan, Robert Bosch LLC
 
 #ifndef ARDUINO_INTERFACE_H_
 #define ARDUINO_INTERFACE_H_
@@ -96,15 +96,15 @@ public:
   ssize_t read( int device_address, interface_protocol protocol, int frequency, int* flags, uint8_t reg_address, uint8_t* data, size_t num_bytes );
   
   /**
-   * \brief Reads \a num_bytes from the requested device on the specified \a protocol at the specified protocol \a frequency
+   * \brief Writes \a num_bytes from the requested device on the specified \a protocol at the specified protocol \a frequency
    * \var   int device_address the way that the sensor itentifies itself
    * \var   interface_protocol protocol the defined protocol
    * \var   int frequency the frequency of the interface protocol
-   * \var   int* flags additional information necessary to read from that particular interface protocol.
+   * \var   int* flags additional information necessary to write to that particular interface protocol.
    * \var   uint8_t reg_address the starting address in the sensor's registers where the data will be written to.
    * \var   uint8_t* data the name of the array where the data will be output from.
    * \var   uint8_t num_bytes the number of bytes to be written to the sensor.
-   * \return \a num_bytes or a value less than zero, if the read failed.
+   * \return \a num_bytes or a value less than zero, if the write failed.
    */
   ssize_t write( int device_address, interface_protocol protocol, int frequency, int* flags, uint8_t reg_address, uint8_t* data, size_t num_bytes );
 
@@ -122,10 +122,17 @@ public:
 
 private:
 
-  ssize_t arduinoSpiRead( int frequency, int* flags, uint8_t reg_address, uint8_t* data, size_t num_bytes );
-  ssize_t arduinoSpiWrite( int frequency, int* flags, uint8_t reg_address, uint8_t* data, size_t num_bytes );
-  ssize_t arduinoI2cRead( uint8_t device_address, int frequency, uint8_t reg_address, uint8_t* data, size_t num_bytes );                
-  ssize_t arduinoI2cWrite( uint8_t device_address, int frequency, uint8_t reg_address, uint8_t* data, size_t num_bytes );
+  ssize_t arduinoSpiRead( uint8_t frequency, uint8_t flags, uint8_t reg_address, uint8_t* data, size_t num_bytes );
+  ssize_t arduinoSpiWrite( uint8_t frequency, uint8_t flags, uint8_t reg_address, uint8_t* data, size_t num_bytes );
+  ssize_t arduinoI2cRead( uint8_t device_address, uint32_t frequency, uint8_t reg_address, uint8_t* data, size_t num_bytes );                
+  ssize_t arduinoI2cWrite( uint8_t device_address, uint32_t frequency, uint8_t reg_address, uint8_t* data, size_t num_bytes );
+	ssize_t arduinoPwmWrite( uint32_t frequency, uint8_t reg_address, uint8_t data );
+	ssize_t arduinoGpioRead( uint8_t flags, uint8_t pin, uint8_t* value );
+	ssize_t arduinoGpioWrite( uint8_t pin, bool value );
+	ssize_t arduinoEncoderRead( int* pin, uint8_t* data );
+	ssize_t arduinoEncoderWrite( int* flags, uint8_t* data );
+	ssize_t arduinoAdcWrite( uint8_t* voltage );
+	ssize_t arduinoAdcRead( uint8_t pin, uint8_t* data );
 
   bool waitOnBytes( int num_bytes );
 
@@ -167,14 +174,20 @@ private:
   bool is_initialized_;
  
   /**
-   * \brief Contains protocol, frequency, and whether or not a read or write
+   * \brief Contains used protocol and whether or not a read or write
    * command is about to be requested.
    *
    * This information allows the Arduino to prepare to send the following data
    * according to the input parameters of \a data_packet_ .
-   * \note  The information is encoded as flags in \a data_packet_
+   * The read/write flag is saved in the lowest bit while the upper 7 bits
+   * are reserved for the used protocol
    */
   uint8_t data_packet_;
+  
+  /**
+   * \brief stores the selected reference voltage for the ADC in milli volts [mV]
+   */
+  uint16_t _reference_voltage;
 
 };
 #endif //ARDUINO_INTERFACE_H_

@@ -34,11 +34,11 @@
  *
  *********************************************************************/
 
-//\Author Joshua Vasquez and Philip Roan, Robert Bosch LLC
+//\Author Joshua Vasquez, Kai Franke, and Philip Roan, Robert Bosch LLC
 
 #include <Wire.h>
 #include <SPI.h>
-
+#include "Encoder.h"
 
 #include <arduino_constants.hpp>
 
@@ -94,6 +94,9 @@ uint8_t flags_;
 // main loop variables
 bool state_ = false;
 
+// encoder variables
+Encoder* myEnc[16];
+
 // Function prototypes
 
 bool i2c_read_routine();
@@ -104,8 +107,13 @@ bool spi_read_routine();
 bool spi_write_routine();
 void spi_slave_low( uint8_t spi_slave );
 void spi_slave_high( uint8_t spi_slave );
-
-
+bool pwm_write_routine();
+bool gpio_read_routine();
+bool gpio_write_routine();
+bool encoder_write();
+bool encoder_read();
+bool adc_read();
+bool adc_write();
 
 // initial setup
 void setup()
@@ -119,21 +127,25 @@ void setup()
 void loop()
 {
   while( Serial.available() < 1 )
-    ; // wait for 1st byte:
+    ; // wait for control bytes:
   incoming_byte = Serial.read();
   
   state_ = true;
   
   // Decrypte protocol with bitmasking:
-  protocol = (B11100000 & incoming_byte) >> 5;
-  frequency = (B00011100 & incoming_byte) >> 2;
+  protocol = (B11111110 & incoming_byte) >> 1;
   read_or_write = B00000001 & incoming_byte;
   
-  // Identify Protocol: I2C, SPI
+  // Identify Protocol: I2C, SPI, PWM
   switch( protocol )
   {
-  case bosch_drivers_common::I2C: // flags_: 000 xxx xx
+  case bosch_drivers_common::I2C:
     Wire.begin();
+    // read frequency
+    while( Serial.available() < 1 )
+	{
+	}
+    frequency = Serial.read();
     state_ = change_i2c_frequency( frequency );
     if( read_or_write == bosch_drivers_common::READ )
       state_ = i2c_read_routine();
@@ -142,16 +154,55 @@ void loop()
     else
       state_ = false;
     break;
-      
-  case bosch_drivers_common::SPI: // flags_: 001 xxx xx
+
+  case bosch_drivers_common::SPI:
     SPI.begin();
+    // read frequency
+    while( Serial.available() < 1 )
+	{
+	}
+    frequency = Serial.read();
     SPI.setClockDivider( frequency );
     if( read_or_write == bosch_drivers_common::READ )
       state_ = spi_read_routine();
     else if( read_or_write == bosch_drivers_common::WRITE )
       state_ = spi_write_routine();
     else
-      state_ = false;  
+      state_ = false;
+    break;
+
+  case bosch_drivers_common::PWM:
+    if( read_or_write == bosch_drivers_common::WRITE )
+      state_ = pwm_write_routine();
+    else
+      state_ = false;
+    break;
+    
+  case bosch_drivers_common::GPIO:
+    if( read_or_write == bosch_drivers_common::READ )
+      state_ = gpio_read_routine();
+    else if( read_or_write == bosch_drivers_common::WRITE )
+      state_ = gpio_write_routine();
+    else
+      state_ = false;
+    break;
+
+  case bosch_drivers_common::ENCODER:
+    if( read_or_write == bosch_drivers_common::READ )
+      state_ = encoder_read();
+    else if( read_or_write == bosch_drivers_common::WRITE )
+      state_ = encoder_write();
+    else
+      state_ = false;
+    break;
+    
+    case bosch_drivers_common::ADCONVERTER:
+    if( read_or_write == bosch_drivers_common::READ )
+      state_ = adc_read();
+    else if( read_or_write == bosch_drivers_common::WRITE )
+      state_ = adc_write();
+    else
+      state_ = false;
     break;
     
   default:
@@ -363,7 +414,7 @@ bool spi_write_routine()
   // wait for 3 bytes:
   while( Serial.available() < 3 )
     ; // do nothing.
-  // data_packet_ containing bit_order, mode, pin:
+  // flags containing bit_order, mode, pin:
   uint8_t flags = Serial.read();
   // what register we are writing to:
   uint8_t slave_register = Serial.read();
@@ -470,4 +521,162 @@ void spi_slave_high( uint8_t spi_slave )
   { 
     PORTB |= 1 << (spi_slave - 8);
   }
+}
+
+bool pwm_write_routine()
+{
+  // wait for 2 bytes
+  while( Serial.available() < 2 );
+  uint8_t pwm_channel = Serial.read();
+  uint8_t pwm_duty_cycle = Serial.read();
+  analogWrite(pwm_channel, pwm_duty_cycle);
+  // send back a success
+  Serial.write( bosch_drivers_common::SUCCESS );
+  return true;
+}
+
+bool gpio_write_routine()
+{
+  // wait for 2 bytes
+  while( Serial.available() < 2 );
+  uint8_t gpio_pin = Serial.read();
+  uint8_t gpio_value = Serial.read();
+  // set GPIO pin to output
+  pinMode(gpio_pin, OUTPUT);
+  
+  // set GPIO pin to desired value
+  if (gpio_value == 1)
+  {
+    digitalWrite(gpio_pin, HIGH);
+  }
+  else if (gpio_value == 0)
+  {
+    digitalWrite(gpio_pin, LOW);
+  }    
+  else
+  {
+    return false;
+  }
+  // send back a success
+  Serial.write( bosch_drivers_common::SUCCESS );
+  return true;
+}
+
+bool gpio_read_routine()
+{
+  // wait for 2 bytes
+  while( Serial.available() < 2 );
+  uint8_t flags = Serial.read();
+  uint8_t gpio_pin = Serial.read();
+  switch(flags)
+  {
+    case bosch_drivers_common::FLOATING: 
+      pinMode(gpio_pin, INPUT); break;
+    case bosch_drivers_common::PULLUP:
+      pinMode(gpio_pin, INPUT_PULLUP); break;
+    default: 
+      return false;
+  }
+    
+  // send back the read value
+  Serial.write( digitalRead(gpio_pin) );
+  return true;
+}
+
+bool encoder_write()
+{
+  long motor_ticks;
+  // wait for 1 byte
+  while( Serial.available() < 1 );
+  uint8_t control_byte = Serial.read();
+  switch( control_byte & 0x0F ) // read lower 4 bits to decrypt right command
+  {
+    case bosch_drivers_common::CREATE:  // create a new encoder object
+    {
+      while( Serial.available() < 2 );  // wait for hardware pin configuration to be transmitted
+      uint8_t encoder_pin1 = Serial.read();
+      uint8_t encoder_pin2 = Serial.read();
+      // create new encoder object in Encoder pointer array at the position defined by the upper 4 bits in the control byte
+      myEnc[(control_byte & 0xF0) >> 4] = new Encoder(encoder_pin1, encoder_pin2);
+    }break;
+    
+    case bosch_drivers_common::DESTROY: // destroys an encoder object
+    {
+      delete myEnc[(control_byte & 0xF0) >> 4];
+    }break;
+    
+    case bosch_drivers_common::SET_POSITION:  // sets the encoder value
+    {
+      // convert read serial data to long
+      unsigned long temp[4];
+      while( Serial.available() < 4 );
+      temp[0] = Serial.read();
+      temp[1] = Serial.read();
+      temp[2] = Serial.read();
+      temp[3] = Serial.read();
+      motor_ticks  = temp[0] << 24;
+      motor_ticks |= temp[1] << 16;
+      motor_ticks |= temp[2] << 8;
+      motor_ticks |= temp[3] << 0;
+      
+      myEnc[(control_byte & 0xF0) >> 4]->write(motor_ticks);
+    }break;
+    
+    default:
+      return false;
+  }
+  
+  // send back a success
+  Serial.write( bosch_drivers_common::SUCCESS );
+  
+  return true;
+}
+
+bool encoder_read()
+{
+  // wait for 1 byte
+  while( Serial.available() < 1 );
+  uint8_t control_byte = Serial.read();
+  
+  // reads the encoder value from the encoder object at the position defined by the upper 4 bits in the control byte
+  long motor_ticks = myEnc[(control_byte & 0xF0) >> 4]->read();
+  // convert long variable (4 Bytes long) by bitshifting
+  Serial.write((byte)((motor_ticks & 0xFF000000) >> 24));
+  Serial.write((byte)((motor_ticks & 0x00FF0000) >> 16));
+  Serial.write((byte)((motor_ticks & 0x0000FF00) >> 8 ));
+  Serial.write((byte)((motor_ticks & 0x000000FF) >> 0 ));
+  return true;
+}
+
+bool adc_read()
+{
+  // wait for 1 byte
+  while( Serial.available() < 1 );
+  uint8_t adc_pin = Serial.read();
+  uint16_t adc_value;
+  
+  adc_value = (uint16_t)analogRead(adc_pin);
+
+  Serial.write((byte)((adc_value & 0xFF00) >> 8 ));
+  Serial.write((byte)((adc_value & 0x00FF) >> 0 ));
+  return true;
+}
+
+bool adc_write()
+{
+  // wait for 2 bytes
+  while( Serial.available() < 2 );
+  uint16_t reference = Serial.read(); // writes the MSB byte of the reference voltage
+  reference = reference << 8; // shifts the MSB to the proper position
+  reference |= Serial.read(); // writes the LSB
+  switch ( reference )
+  {
+    case 0: analogReference(EXTERNAL);break;
+    case 1100: analogReference(INTERNAL);break;
+    case 5000: analogReference(DEFAULT); break;
+    default: return false;
+  }
+  // send back a success
+  Serial.write( bosch_drivers_common::SUCCESS );
+  return true;
 }
