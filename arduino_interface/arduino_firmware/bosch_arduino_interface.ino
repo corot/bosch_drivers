@@ -674,15 +674,19 @@ bool adc_write()
   case 0:
     analogReference(EXTERNAL);
     break;
+#ifdef __AVR_ATmega328P__
   case 1:
     analogReference(INTERNAL);
     break;
+#endif
+#ifdef __AVR_ATmega2560__
   case 1100:
     analogReference(INTERNAL1V1);
     break;
   case 2560:
     analogReference(INTERNAL2V56);
     break;
+#endif
   case 5000:
     analogReference(DEFAULT);
     break;
