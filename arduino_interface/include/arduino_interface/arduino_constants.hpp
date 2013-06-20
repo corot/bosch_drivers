@@ -83,8 +83,6 @@ namespace bosch_drivers_common
    * \brief ADC constants
    */
   uint16_t MAX_ADC_VALUE = 1023;
-
-  //static const std::string FIRMWARE_VERSION = "BI.1.0" // Bosch IMU v 1.0
 }
 
 #endif //__ARDUINO_CONSTANTS_H__

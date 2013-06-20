@@ -671,10 +671,23 @@ bool adc_write()
   reference |= Serial.read(); // writes the LSB
   switch ( reference )
   {
-    case 0: analogReference(EXTERNAL);break;
-    case 1100: analogReference(INTERNAL);break;
-    case 5000: analogReference(DEFAULT); break;
-    default: return false;
+  case 0:
+    analogReference(EXTERNAL);
+    break;
+  case 1:
+    analogReference(INTERNAL);
+    break;
+  case 1100:
+    analogReference(INTERNAL1V1);
+    break;
+  case 2560:
+    analogReference(INTERNAL2V56);
+    break;
+  case 5000:
+    analogReference(DEFAULT);
+    break;
+  default:
+    return false;
   }
   // send back a success
   Serial.write( bosch_drivers_common::SUCCESS );

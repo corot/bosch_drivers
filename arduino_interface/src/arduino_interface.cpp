@@ -902,15 +902,16 @@ ssize_t ArduinoInterface::arduinoAdcWrite( uint8_t* voltage )
 	 */
   switch (_reference_voltage)
   {
-    case 0:
-    case 1100:
-    case 5000:break;
-    default:
-    {
-	    ROS_ERROR("The selected reference voltage is not available for ADC");
-	    ROS_ERROR("Select 0, 1100 or 5000 instead");
-	    return -1;
-	  }
+  case 0:
+  case 1:  
+  case 1100:
+  case 2560:
+  case 5000:
+    break;
+  default:
+    ROS_ERROR("The selected reference voltage is not available for ADC.");
+    ROS_ERROR("Select 0, 1, 1100, 2560, or 5000 instead.");
+    return -1;
   }
   // construct array to send to Arduino:
   uint8_t write_packet[3];
