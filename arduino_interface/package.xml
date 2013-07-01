@@ -1,5 +1,8 @@
+<?xml version="1.0"?>
 <package>
-  <description brief="arduino_interface">
+  <name>arduino_interface</name>
+  <version>0.0.0</version>
+  <description>
 
      The arduino_interface class contains details specifics to 
      interfacing sensors with software using an Arduino as
@@ -24,18 +27,24 @@
      `make upload' to upload to firmware to the Arduino.
 
   </description>
-  <author>Joshua Vasquez and Philip Roan. Maintained by Philip Roan</author>
+  <author>Joshua Vasquez</author>
+  <author>Philip Roan</author>
+  <maintainer email="nomail@gmail.com">Philip Roan</maintainer>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/arduino_interface</url>
-  <depend package="roscpp"/>
-  <depend package="bosch_drivers_common"/>
-  <depend package="uniserial"/>
 
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>uniserial</build_depend>
+  <build_depend>bosch_drivers_common</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>uniserial</run_depend>
+  <run_depend>bosch_drivers_common</run_depend>
+  
   <!-- Export the header files so library can be used by other packages. -->
   <export>
     <cpp cflags="-I${prefix}/include/arduino_interface" lflags="-L${prefix}/lib -larduino_interface"/>
   </export>
 </package>
-
-
