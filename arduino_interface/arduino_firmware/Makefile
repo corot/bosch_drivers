@@ -276,9 +276,10 @@ READ_TARGET = current_firmware
 
 # Set Arduino board/model
 # Some examples:
-#BOARD := atmega328
-#BOARD := nano
-BOARD := uno
+#  BOARD := mega2560
+#  BOARD := atmega328
+#  BOARD := nano
+#  BOARD := uno
 
 # no board?
 ifndef BOARD
