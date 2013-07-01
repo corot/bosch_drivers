@@ -1,0 +1,25 @@
+<package>
+  <name>adc_driver</name>
+  <version>0.0.0</version>
+  <description>
+
+     adc_driver
+
+  </description>
+  <author>Kai Franke</author>
+  <maintainer email="nomail@gmail.com">Philip Roan</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/adc_driver</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>arduino_interface</build_depend>
+  <build_depend>bosch_drivers_common</build_depend>
+
+  <run_depend>arduino_interface</run_depend>
+  <run_depend>bosch_drivers_common</run_depend>
+
+  <export> 
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -ladc_driver" />
+  </export>
+</package>
