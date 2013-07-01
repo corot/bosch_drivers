@@ -822,11 +822,21 @@ ssize_t ArduinoInterface::arduinoAdcRead( uint8_t pin, uint8_t* data )
     case 2:
     case 3:
     case 4:
-    case 5: break;
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15: break;
     default:
     {
 	    ROS_ERROR("The selected Pin number is not available for ADC");
-	    ROS_ERROR("Select Pins 0 through 5 instead");
+	    ROS_ERROR("Select Pins 0 through 15 instead");
 	    return -1;
 	  }
   }
