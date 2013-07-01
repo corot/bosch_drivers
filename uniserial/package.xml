@@ -1,5 +1,8 @@
+<?xml version="1.0"?>
 <package>
-  <description brief="uniserial">
+  <name>uniserial</name>
+  <version>0.0.0</version>
+  <description>
 
      This class provides Unix machines with access to serial devices 
      through serial ports. Essentially, this class is a wrapper of the 
@@ -10,16 +13,20 @@
      initialize(args..) method rather than the initialize() method.  
 
   </description>
-  <author>Joshua Vasquez and Philip Roan. Maintained by Philip Roan</author>
+  <author>Joshua Vasquez</author>
+  <author>Philip Roan</author>
+  <maintainer email="nomail@gmail.com">Philip Roan</maintainer>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/uniserial</url>
-  <depend package="roscpp"/>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+
+  <run_depend>roscpp</run_depend>
 
   <!-- Export the header files so library can be used by other packages. -->
   <export>
      <cpp cflags="-I${prefix}/include/uniserial" lflags="-L${prefix}/lib -luniserial"/>
   </export>
 </package>
-
-
