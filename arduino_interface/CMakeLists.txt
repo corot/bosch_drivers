@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(arduino_interface)
 
-find_package(catkin REQUIRED uniserial bosch_drivers_common)
+find_package(catkin REQUIRED roscpp uniserial bosch_drivers_common)
 
 catkin_package(
   INCLUDE_DIRS include/arduino_interface
   LIBRARIES arduino_interface
-  CATKIN_DEPENDS uniserial bosch_drivers_common
+  CATKIN_DEPENDS roscpp uniserial bosch_drivers_common
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
