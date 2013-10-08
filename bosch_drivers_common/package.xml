@@ -21,8 +21,6 @@
 
   <run_depend>roscpp</run_depend>
 
-  <!-- Export the header files so library can be used by other packages. -->
   <export>
-     <cpp cflags="-I${prefix}/include/bosch_drivers_common"/>
   </export>
 </package>

@@ -12,15 +12,9 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(arduino_interface src/arduino_interface.cpp)
-target_link_libraries(arduino_interface uniserial)
+target_link_libraries(arduino_interface ${catkin_LIBRARIES})
 
 
-#set the default path for built executables to the "bin" directory
-#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-#set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
-
-
-#add_subdirectory(arduino_firmware)
-#execute_process(COMMAND make -f Makefile)
+# Build the firmware
+# add_subdirectory(arduino_firmware)
+# execute_process(COMMAND make -f Makefile)
