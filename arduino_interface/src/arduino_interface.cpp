@@ -528,9 +528,8 @@ ssize_t ArduinoInterface::arduinoPwmWrite( uint32_t frequency, uint8_t reg_addre
 /**********************************************************************/
 ssize_t ArduinoInterface::arduinoGpioWrite( uint8_t pin, bool value )
 {
-  /* 
-	 * the following block is Arduino Uno specific
-	 */
+  // Note that we check pin validity for the board with a wider range (Mega2560);
+  // other boards normally have much less pins (e.g. Arduino Uno has until Gp13)
   switch (pin)
   {
     case 0:
@@ -546,11 +545,52 @@ ssize_t ArduinoInterface::arduinoGpioWrite( uint8_t pin, bool value )
     case 10:
     case 11:
     case 12:
-    case 13: break;
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 24:
+    case 25:
+    case 26:
+    case 27:
+    case 28:
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+    case 41:
+    case 42:
+    case 43:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+    case 48:
+    case 49:
+    case 50:
+    case 51:
+    case 52:
+    case 53:
+      break;
     default:
     {
 	    ROS_ERROR("The selected Pin number is not available for GPIO");
-	    ROS_ERROR("Select Pins 0 through 13 instead");
+	    ROS_ERROR("Select Pins 0 through 53 instead");
 	    return -1;
 	  }
   }
@@ -582,9 +622,8 @@ ssize_t ArduinoInterface::arduinoGpioWrite( uint8_t pin, bool value )
 /**********************************************************************/
 ssize_t ArduinoInterface::arduinoGpioRead( uint8_t flags, uint8_t pin, uint8_t* value )
 {
-  /* 
-	 * the following block is Arduino Uno specific
-	 */
+  // Note that we check pin validity for the board with a wider range (Mega2560);
+  // other boards normally have much less pins (e.g. Arduino Uno has until Gp13)
   switch (pin)
   {
     case 0:
@@ -600,11 +639,52 @@ ssize_t ArduinoInterface::arduinoGpioRead( uint8_t flags, uint8_t pin, uint8_t* 
     case 10:
     case 11:
     case 12:
-    case 13: break;
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 24:
+    case 25:
+    case 26:
+    case 27:
+    case 28:
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+    case 41:
+    case 42:
+    case 43:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+    case 48:
+    case 49:
+    case 50:
+    case 51:
+    case 52:
+    case 53:
+      break;
     default:
     {
 	    ROS_ERROR("The selected Pin number is not available for GPIO");
-	    ROS_ERROR("Select Pins 0 through 13 instead");
+	    ROS_ERROR("Select Pins 0 through 53 instead");
 	    return -1;
 	  }
   }
@@ -812,9 +892,8 @@ ssize_t ArduinoInterface::arduinoEncoderWrite( int* flags, uint8_t* data )
 
 ssize_t ArduinoInterface::arduinoAdcRead( uint8_t pin, uint8_t* data )
 {
-/* 
-	 * the following block is Arduino Uno specific
-	 */
+  // Note that we check pin validity for the board with a wider range (Mega2560);
+  // other boards normally have much less pins (e.g. Arduino Uno has until A5)
   switch (pin)
   {
     case 0:
